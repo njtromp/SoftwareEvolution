@@ -1,0 +1,12 @@
+# The code from the Tutor should not be part of the shared code.
+Session0/
+
+# Ignore generated output
+bin/
+
+# Ignore Eclipse specifics
+.classpath
+.project
+.settings/
+build.properties
+*.MF
