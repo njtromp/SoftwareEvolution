@@ -9,7 +9,7 @@ Since this repository only contains the Rascal sourcefiles, and not any of the E
 * Now you can either use 'Next' or 'Finish' to finalize the creation of your project.
 
 ## Starting a Rascal (REPL) terminal.
-Sometimes when the Rascal terminal keeps complaining about 'Could not import module <<modulename>>: can not find in search path', here is what you can do.
+Sometimes when the Rascal terminal keeps complaining about 'Could not import module ..modulename..: can not find in search path', here is what you can do.
 * Right-click on the 'src' folder and select 'Rascal Console'.
 
 Have fun.
