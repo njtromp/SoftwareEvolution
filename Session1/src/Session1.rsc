@@ -19,8 +19,10 @@ import CyclomaticComplexity;
  */
  
  private set[int] registerLOC(set[int] linesOfCode, loc src) {
- 	//linesOfCode += src.begin.line;
- 	//linesOfCode += src.end.line;
+ 	if (src.scheme != "unknown") {
+	 	linesOfCode += src.begin.line;
+	 	linesOfCode += src.end.line;
+ 	}
  	return linesOfCode;
  }
  
@@ -33,9 +35,9 @@ public void determineMetrics(loc file) {
 	ms = methods(model);
 	println("Number of methods <size(ms)>");
 	
-	ast = createAstFromFile(file, false, javaVersion = "1.8");
+	ast = createAstFromFile(file, false);
 	set[int] linesOfCode = {};
-	visit (ast) {
+	top-down visit (ast) {
 		case /Declaration decl : linesOfCode = registerLOC(linesOfCode, decl.src);
 		case /Expression expr : linesOfCode = registerLOC(linesOfCode, expr.src);
 	}
@@ -54,8 +56,9 @@ public void runMetrics() {
 	determineMetrics(|home:///Rascal.java|);
 
 	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src|, false);
-	//println("SmallSQL #classes = <size(smallModels)>");
-	//println(analyseComplexity(smallModels));
+	smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src/smallsql/tools|, false);
+	println("SmallSQL #classes = <size(smallModels)>");
+	println(analyseComplexity(smallModels));
 	
 	//hsqlModels = createAstsFromDirectory(|home:///Projects/hsqldb/src|, false);
 	//println("HslDb #classes = <size(hsqlModels)>");
