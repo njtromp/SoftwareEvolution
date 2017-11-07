@@ -25,11 +25,11 @@ private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 
 	list[MethodComplexity] methodComlexities = [];
 	
-	for (aMethod <- clazz.body, \method(_, _, _, _, _) := aMethod) {
-		dprintln("Method = <aMethod.name>");
-		int cc = cyclomaticComplexity(aMethod.impl);
-		dprintln("CC = <cc>");
-		methodComlexities += <aMethod.name, cc>;
+	for (aMethod <- clazz.body, \method(_, name, _, _, statements) := aMethod || \constructor(name, _, _, statements) := aMethod) {
+		dprintln("Method = [<name>]");
+		int complexity = cyclomaticComplexity(statements);
+		dprintln("Cyclomatic Complexity = [<complexity>]");
+		methodComlexities += <name, complexity>;
 	}
 
 	return <clazz.name, methodComlexities>;
