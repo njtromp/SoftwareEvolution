@@ -1,13 +1,7 @@
 module CyclomaticComplexity
 
-import IO;
 import List;
-
-//import analysis::m3::Core;
-
-import lang::java::m3::Core;
 import lang::java::m3::AST;
-
 import DebugPrint;
 
 alias Class = str;

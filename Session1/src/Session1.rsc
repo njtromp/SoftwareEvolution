@@ -50,7 +50,7 @@ public void determineMetrics(loc file) {
 }
 
 public void runMetrics() {
-	enterDebug(true);
+	enterDebug(false);
 	determineMetrics(|home:///Rascal.java|);
 
 	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src|, false);
