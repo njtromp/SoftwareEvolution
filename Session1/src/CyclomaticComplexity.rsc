@@ -34,7 +34,7 @@ private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 
 	return <clazz.name, methodComlexities>;
 }
-
+// For more see: http://tutor.rascal-mpl.org/Rascal/Rascal.html#/Rascal/Libraries/lang/java/m3/AST/Declaration/Declaration.html
 private int cyclomaticComplexity(Statement statements) {
 	int cc = 1;
 	top-down visit(statements) {
@@ -58,9 +58,13 @@ private int cyclomaticComplexity(Statement statements) {
 			cc += 1;
 			dprintln("While");
 		}
-		case \for(_, _, _, _) : {
+		case \for(_, _, _) : {
 			cc += 1;
 			dprintln("For"); 
+		}
+		case \for(_, _, _, _) : {
+			cc += 1;
+			dprintln("For-With-Condition"); 
 		}
 		case \foreach(_, _, _) : { 
 			cc += 1;
