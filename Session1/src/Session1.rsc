@@ -53,6 +53,7 @@ public void determineMetrics(loc file) {
 
 public void runMetrics() {
 	enterDebug(false);
+
 	determineMetrics(|home:///Rascal.java|);
 
 	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src|, false);
@@ -63,5 +64,6 @@ public void runMetrics() {
 	//hsqlModels = createAstsFromDirectory(|home:///Projects/hsqldb/src|, false);
 	//println("HslDb #classes = <size(hsqlModels)>");
 	//println(analyseComplexity(hsqlModels));
+
 	enterDebug(false);
 }
