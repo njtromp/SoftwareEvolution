@@ -54,12 +54,12 @@ public void determineMetrics(loc file) {
 public void runMetrics() {
 	enterDebug(false);
 
-	determineMetrics(|home:///Rascal.java|);
+	determineMetrics(|project://Session1/src/Rascal.java|);
 
 	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src|, false);
-	smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src/smallsql/tools|, false);
-	println("SmallSQL #classes = <size(smallModels)>");
-	println(analyseComplexity(smallModels));
+	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src/smallsql/tools|, false);
+	//println("SmallSQL #classes = <size(smallModels)>");
+	//println(analyseComplexity(smallModels));
 	
 	//hsqlModels = createAstsFromDirectory(|home:///Projects/hsqldb/src|, false);
 	//println("HslDb #classes = <size(hsqlModels)>");

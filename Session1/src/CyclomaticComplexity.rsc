@@ -44,7 +44,6 @@ private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 		//int msloc = size(lines);
 		//dprintln("Method-SLOC [<msloc>]");
 
-		for (stmt <- statements)
 		int complexity = cyclomaticComplexity(statements);
 		dprintln("Cyclomatic Complexity = [<complexity>]");
 		methodComplexities += <name, complexity>;
