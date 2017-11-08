@@ -1,14 +1,14 @@
 /*
  * Licence
  */
-package rascal;
+package java;
 
 /**
 *
 */
-public class Rascal {
+public class SimpleTest {
 	
-	public Rascal() {
+	public SimpleTest() {
 		if (true) {
 			System.out.println();
 		}

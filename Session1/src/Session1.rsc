@@ -30,16 +30,16 @@ public void runMetrics() {
 public int sloc(str text) = linesOfCode(text);
 
 public lrel[loc,int,lrel[loc,int]] slocForMethodsPerClass() {
-	model = createM3FromFile(|project://Session1/src/rascal/Rascal.java|);
+	model = createM3FromFile(|project://Session1/src/java/SimpleTest.java|);
 	return [ <cl, sloc(readFile(cdl.src)), [ <m, sloc(readFile(mdl.src))> | m <- model.containment[cl], isMethod(m), mdl <- model.declarations, mdl.name == m]> | cl <- classes(model), cdl <- model.declarations, cdl.name == cl];
 }
 
 public M3 testing() {
-	testModel = createM3FromFile(|project://Session1/src/rascal/Rascal.java|);
+	model = createM3FromFile(|project://Session1/src/java/SimpleTest.java|);
 	//[ <methodName, linesOfCode(readFile(decl.src))> | methodName <- methods(model), decl <- model.declarations, decl.name == methodName ];
 	//[ <cl,me> | cl <- classes(smallModel), me <- methods(smallModel)]
 	//[ <cl,linesOfCode(readFile(cldecl.src)), [ <m, linesOfCode(readFile(mdecl.src))> | m <- smallModel.containment[cl], isMethod(m), mdecl <- smallModel.declarations, mdecl.name == m]> | cl <- classes(smallModel), cldecl <- smallModel.declarations, cldecl.name == cl]
-	return testModel;	
+	return model;	
 }
 
 public lrel[loc,int,lrel[loc,int]] slocForMethodsPerClassSmallSql() {
