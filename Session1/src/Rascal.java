@@ -9,9 +9,9 @@ public class Rascal {
 			System.out.println();
 		}
 	}
-	// static {
-	// 	System.out.println("There we go...");
-	// }
+	 static {
+	 	System.out.println("There we go...");
+	 }
     public void nothing(int i) {
          if (i < 10) {
          	java.lang.System.out.println("Klein");
@@ -51,6 +51,9 @@ public class Rascal {
          } finally {
          	System.out.println();
          }
+         /*
+          * Multiline comment
+          */
          String[] namen = {"Nico", "Rob"};
          for (String naam : namen) {
          	System.out.println(naam);
@@ -76,6 +79,9 @@ public class Rascal {
     private int noOfA;
     private int noOfB;
 
+    /*
+     * bla
+     */
     // other member methods... 
     public int getNumberOfDependents()
     {
@@ -94,6 +100,9 @@ public class Rascal {
         return this.noOfB;
     }
 
+    /*
+     * bla
+     */
     public void anotherCCTest(int a, int b) {
     	if (a > 10) {
     		if (b > 10) {
