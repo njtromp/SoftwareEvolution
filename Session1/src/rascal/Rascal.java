@@ -1,17 +1,23 @@
+/*
+ * Licence
+ */
 package rascal;
 
 /**
 *
 */
 public class Rascal {
+	
 	public Rascal() {
 		if (true) {
 			System.out.println();
 		}
 	}
+	
 	 static {
 	 	System.out.println("There we go...");
 	 }
+	 
     public void nothing(int i) {
          if (i < 10) {
          	java.lang.System.out.println("Klein");
@@ -22,13 +28,11 @@ public class Rascal {
          	java.lang.System.out.println("Groot");
          	java.lang.System.out.println("Groot");
          }
-         for (int i = 0; i < 10; i++) {
+         for (int j = 0; j < 10; j++) {
          	System.out.println();
          }
 
-         try {
-         	System.out.println();
-         }
+        	System.out.println();
 
          try {
          	System.out.println();
@@ -37,8 +41,6 @@ public class Rascal {
          }
 
          try {
-         	System.out.println();
-         } catch (Exception e) {
          	System.out.println();
          } catch (Exception e) {
          	System.out.println();
@@ -75,7 +77,7 @@ public class Rascal {
 	}
 
 	  // other member fields... 
-    private bool isVerified;
+    private boolean isVerified;
     private int noOfA;
     private int noOfB;
 
