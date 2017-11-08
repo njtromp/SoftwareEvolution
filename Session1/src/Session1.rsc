@@ -7,8 +7,8 @@ import Set;
 
 import analysis::m3::Core;
 
-import lang::java::m3::Core;
-import lang::java::m3::AST;
+import lang::java::jdt::m3::Core;
+import lang::java::jdt::m3::AST;
 
 import DebugPrint;
 import CyclomaticComplexity;
@@ -30,7 +30,7 @@ public void determineMetrics(loc file) {
 	str fileContent = readFile(file);
 	list[str] lines = split("\n", fileContent);
 
-	M3 model = createM3FromFile(file);
+	M3 model = createM3FromEclipseProject(file);
 	
 	ms = methods(model);
 	println("Number of methods <size(ms)>");
@@ -57,7 +57,7 @@ public void runMetrics() {
 	determineMetrics(|project://Session1/src/Rascal.java|);
 
 	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src|, false);
-	//smallModels = createAstsFromDirectory(|home:///Projects/smallsql/src/smallsql/tools|, false);
+	//smallModels = createAstsFromDirectory(|project:///SmallSql|, true);
 	//println("SmallSQL #classes = <size(smallModels)>");
 	//println(analyseComplexity(smallModels));
 	
