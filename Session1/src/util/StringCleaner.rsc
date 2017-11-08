@@ -1,7 +1,5 @@
 module util::StringCleaner
 
-import IO;
-
 public str removeEmptyLines(str text) {
 	return visit(text) {
 		case /^\s*\n/ => ""
