@@ -4,6 +4,7 @@ import IO;
 
 public str removeEmptyLines(str text) {
 	return visit(text) {
+		case /^\s*\n/ => ""
 		case /(\s*\n)+/ => "\n"
 	};
 }

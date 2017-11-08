@@ -3,7 +3,7 @@ module util::Metrics
 import String;
 import List;
 
-import StringCleaner;
+import util::StringCleaner;
 
 public int countLines(str text) {
 	return size(split("\n", text));
