@@ -31,14 +31,20 @@ public str cleanFile(str file) {
 	return removeEmptyLines(removeMultiLineComments(removeSingleLineComments(convertToNix(file))));
 }
 
-test bool testRemoveEmptyLines1() = removeEmptyLines("")            == "";
-test bool testRemoveEmptyLines2() = removeEmptyLines("\npublic")    == "public";
-test bool testRemoveEmptyLines3() = removeEmptyLines("\n\npublic") == "public";
-test bool testRemoveEmptyLines4() = removeEmptyLines("public\n\n class") == "public\n class";
-test bool testRemoveEmptyLines5() = removeEmptyLines("public\n \n class") == "public\n class";
+// Ugly test names
+test bool testRemoveEmptyLines1() = removeEmptyLines("")                      == "";
+test bool testRemoveEmptyLines2() = removeEmptyLines("\npublic")              == "public";
+test bool testRemoveEmptyLines3() = removeEmptyLines("\n\npublic")            == "public";
+test bool testRemoveEmptyLines4() = removeEmptyLines("public\n\n class")      == "public\n class";
+test bool testRemoveEmptyLines5() = removeEmptyLines("public\n \n class")     == "public\n class";
 test bool testRemoveEmptyLines6() = removeEmptyLines("public \n \t \n class") == "public\n class";
-test bool testRemoveEmptyLines7() = removeEmptyLines("public\n \t \nclass") == "public\nclass";
-test bool testRemoveEmptyLines8() = removeEmptyLines("public\n\n\nclass") == "public\nclass";
+test bool testRemoveEmptyLines7() = removeEmptyLines("public\n \t \nclass")   == "public\nclass";
+test bool testRemoveEmptyLines8() = removeEmptyLines("public\n\n\nclass")     == "public\nclass";
+
+test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
+test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
+test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "\nclass";
+test bool testRemoveSingleLineComments4() = removeSingleLineComments("public// Junk\nclass") == "public\nclass";
 
 test bool testRNConvertToNix()    = convertToNix("\r\n")     == "\n\n";
 test bool testRNRConvertToNix()   = convertToNix("\r\n\r")   == "\n\n\n";
