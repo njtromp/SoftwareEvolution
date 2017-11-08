@@ -23,7 +23,6 @@ public list[ClassComplexity] analyseComplexity(set[Declaration] models) {
 		}
 	}
 	return sort(classComplexities, classComplexityOrder);
-	//return classComplexities;
 }
 
 private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
