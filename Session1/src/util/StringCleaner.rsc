@@ -41,6 +41,8 @@ test bool testRemoveEmptyLines6() = removeEmptyLines("public \n \t \n class") ==
 test bool testRemoveEmptyLines7() = removeEmptyLines("public\n \t \nclass")   == "public\nclass";
 test bool testRemoveEmptyLines8() = removeEmptyLines("public\n\n\nclass")     == "public\nclass";
 
+// TODO add tests for multiline comments
+
 test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
 test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "\nclass";
