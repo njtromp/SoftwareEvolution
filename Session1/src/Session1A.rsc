@@ -9,10 +9,9 @@ import lang::java::m3::Core;
 import lang::java::m3::AST;
 import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
-import demo::McCabe; // :-)
+import demo::McCabe; // :-) Lets see what we can do with it...
 
-// Calculates the SLOC for a method
-public int sloc(Statement body) {
+public int sloc(value body) {
 	set[int] methodLines = {};
 	visit(body) {
 		case /loc l : if (l.scheme == "project") {
@@ -20,17 +19,6 @@ public int sloc(Statement body) {
 		}
 	};
 	return size(methodLines);
-}
-
-// Calculates the SLOC for a class
-public int sloc(list[Declaration] body) {
-	set[int] classLines = {};
-	visit(body) {
-		case /loc l : if (l.scheme == "project") {
-			classLines += {l.begin.line, l.end.line};
-		}
-	};
-	return size(classLines);
 }
 
 public void testing() {
