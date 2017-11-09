@@ -52,7 +52,8 @@ public tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 }
 
 // For more see: http://tutor.rascal-mpl.org/Rascal/Rascal.html#/Rascal/Libraries/lang/java/m3/AST/Declaration/Declaration.html
-public int cyclomaticComplexity(Statement statements) {
+//public int cyclomaticComplexity(Statement statements) {
+public int cyclomaticComplexity(value statements) {
 	int cc = 1;
 	top-down visit(statements) {
 		case \if(_, _) : {
@@ -87,20 +88,21 @@ public int cyclomaticComplexity(Statement statements) {
 			cc += 1;
 			dprintln("Foreach"); 
 		}
-		case \try(_, exceptions) : {
-			cc += size(exceptions);
-			dprintln("Try-Catch-(<size(exceptions)>)");
-		}
-		case \try(_, exceptions, finallyBlock) : {
-			cc += size(exceptions);
-			switch (<size(exceptions), isEmpty(finallyBlock.statements)>) {
-				case <0, true>  : dprintln("Try");
-				case <0, false> : dprintln("Try-Finally");
-				case <_, true>  : dprintln("Try-Catch-(<size(exceptions)>). Usually handled by separatly!");
-				case <_, false> : dprintln("Try-Catch-(<size(exceptions)>)-Finally");
-			}
-		}
+		//case \try(_, exceptions) : {
+		//	cc += size(exceptions);
+		//	dprintln("Try-Catch-(<size(exceptions)>)");
+		//}
+		//case \try(_, exceptions, finallyBlock) : {
+		//	cc += size(exceptions);
+		//	switch (<size(exceptions), isEmpty(finallyBlock.statements)>) {
+		//		case <0, true>  : dprintln("Try");
+		//		case <0, false> : dprintln("Try-Finally");
+		//		case <_, true>  : dprintln("Try-Catch-(<size(exceptions)>). Usually handled by separatly!");
+		//		case <_, false> : dprintln("Try-Catch-(<size(exceptions)>)-Finally");
+		//	}
+		//}
 		case \catch(_, _) : { 
+			cc += 1;
 			dprintln("Catch"); // Already counted with Try 
 		}
 	}

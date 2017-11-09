@@ -10,6 +10,7 @@ import lang::java::m3::AST;
 import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
 import demo::McCabe; // :-) Lets see what we can do with it...
+import CyclomaticComplexity;
 
 public int sloc(value body) {
 	set[int] methodLines = {};
@@ -32,8 +33,8 @@ public void testing() {
 	};
 	println("Total LOC [<totalLines>]");
 	visit (ast) {
-		case method(_, name, _, _, stmt) : println("[<name>] = <sloc(stmt)>");
-		case constructor(name, _, _, stmt) : println("[Constructor] = <sloc(stmt)>");
-		case initializer(stmt) : println("[Init] = <sloc(stmt)>");
+		case method(_, name, _, _, stmt) : println("[<name>] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
+		case constructor(name, _, _, stmt) : println("[Constructor] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
+		case initializer(stmt) : println("[Init] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
 	}
 }
