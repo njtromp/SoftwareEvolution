@@ -25,7 +25,7 @@ public list[ClassComplexity] analyseComplexity(set[Declaration] models) {
 	return sort(classComplexities, classComplexityOrder);
 }
 
-private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
+public tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 	dprintln("Class = <clazz.name>");
 
 	str classSource = readFile(clazz.src);
@@ -52,7 +52,7 @@ private tuple[str, list[MethodComplexity]] analyseClass(Declaration clazz) {
 }
 
 // For more see: http://tutor.rascal-mpl.org/Rascal/Rascal.html#/Rascal/Libraries/lang/java/m3/AST/Declaration/Declaration.html
-private int cyclomaticComplexity(Statement statements) {
+public int cyclomaticComplexity(Statement statements) {
 	int cc = 1;
 	top-down visit(statements) {
 		case \if(_, _) : {

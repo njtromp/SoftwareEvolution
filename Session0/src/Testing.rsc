@@ -36,7 +36,7 @@ public void printDemo() {
 
 public data Color = red(int level) | blue(int level);
 
-public list[value] lijst = ["Nico", "Evelie", 0, false];
+public list[value] lijst = ["Nico", "Evelien", 0, false];
 
 public map[int, str] hexdigits = (0:"0", 1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"A", 11:"B", 12:"C", 13:"d", 14:"E", 15:"F");
 
