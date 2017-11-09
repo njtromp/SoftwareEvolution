@@ -27,11 +27,11 @@ public void runMetrics() {
 	determineMetrics(|project://SmallSql|);
 }
 
-public int sloc(str text) = linesOfCode(text);
+public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
 
 public lrel[loc,int,lrel[loc,int]] slocForMethodsPerClass() {
 	model = createM3FromFile(|project://Session1/src/java/SimpleTest.java|);
-	return [ <cl, sloc(readFile(cdl.src)), [ <m, sloc(readFile(mdl.src))> | m <- model.containment[cl], isMethod(m), mdl <- model.declarations, mdl.name == m]> | cl <- classes(model), cdl <- model.declarations, cdl.name == cl];
+	return [ <cl, linesOfCode(readFile(cdl.src)), [ <m, linesOfCode(readFile(mdl.src))> | m <- model.containment[cl], isMethod(m), mdl <- model.declarations, mdl.name == m]> | cl <- classes(model), cdl <- model.declarations, cdl.name == cl];
 }
 
 public M3 testing() {
@@ -42,8 +42,7 @@ public M3 testing() {
 	return model;	
 }
 
-public lrel[loc,int,lrel[loc,int]] slocForMethodsPerClassSmallSql() {
+public lrel[loc,lrel[loc,int],int] slocForMethodsPerClassSmallSql() {
 	model = createM3FromEclipseProject(|project://SmallSql|);
-	return [ <cl, sloc(readFile(cdl.src)), [ <m, sloc(readFile(mdl.src))> | m <- model.containment[cl], isMethod(m), mdl <- model.declarations, mdl.name == m]> | cl <- classes(model), cdl <- model.declarations, cdl.name == cl];
+	return [ <cl, [ <m, sloc(model.declarations[m])> | m <- model.containment[cl], isMethod(m)], sloc(model.declarations[cl])> | cl <-classes(model)];
 }
-
