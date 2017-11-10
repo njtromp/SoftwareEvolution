@@ -12,7 +12,6 @@ import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
 import analysis::graphs::Graph;
 import demo::McCabe; // :-) Lets see what we can do with it...
-//import CyclomaticComplexity;
 
 public int sloc(value body) {
 	set[int] methodLines = {};
@@ -54,6 +53,24 @@ public GraphInfo insertShortcut(GraphInfo info) {
 	return <info.last+2, info.last+3, info.last+4, g>;
 }
 
+public GraphInfo insertChoice(GraphInfo info) {
+	Graph[int] g = info.graph;
+	// Remove inner connection
+	g -= <info.top, info.bottom>;
+	// Replace with new connections on the left hand side
+	g += <info.top, info.last+1>;
+	g += <info.last+1, info.last+2>;
+	g += <info.last+2, info.last+3>;
+	g += <info.last+3, info.last+4>;
+	g += <info.last+4, info.bottom>;
+	// Replace with new connections on the right hand side
+	g += <info.last+1, info.last+5>;
+	g += <info.last+5, info.last+6>;
+	g += <info.last+6, info.last+4>;
+	// Continue at new inserted connection on the left hand side
+	return <info.last+2, info.last+3, info.last+6, g>;
+}
+
 public GraphInfo makeGraph(GraphInfo info, \block(stmts)) {
 	for (stmt <- stmts) {
 		info = makeGraph(insertBlock(info), stmt);
@@ -63,6 +80,11 @@ public GraphInfo makeGraph(GraphInfo info, \block(stmts)) {
 
 public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock)) {
 	return makeGraph(insertShortcut(info), ifBlock);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock, elseBlock)) {
+	partialGraph = makeGraph(insertChoice(info), ifBlock);
+	return makeGraph(<info.last+5, info.last+6, partialGraph.last, partialGraph.graph>, elseBlock);
 }
 
 public GraphInfo makeGraph(GraphInfo info, \for(_, _, _, block)) {
