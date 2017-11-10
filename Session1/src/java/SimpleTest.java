@@ -3,6 +3,8 @@
  */
 package java;
 
+import java.io.IOException;
+
 /**
 *
 */
@@ -16,6 +18,10 @@ public class SimpleTest {
 	
 	 static {
 	 	System.out.println("There we go...");
+	 }
+	 
+	 static {
+		 System.out.println("Nog een keer...");
 	 }
 	 
     public void nothing(int i) {
@@ -41,14 +47,8 @@ public class SimpleTest {
          }
 
          try {
-         	System.out.println();
-         } catch (Exception e) {
-         	System.out.println();
-         }
-
-         try {
-         	System.out.println();
-         } catch (Exception e) {
+          	throw new IOException("bla");
+         } catch (IOException e) {
          	System.out.println();
          } finally {
          	System.out.println();
@@ -60,9 +60,11 @@ public class SimpleTest {
          for (String naam : namen) {
          	System.out.println(naam);
          }
-         switch (i) {
+         switch ((int)(Math.random()*10)) {
          	case 1 : System.out.println();
+         		break;
          	case 2 : System.out.println();
+         		break;
          	default : System.out.println();
          }
     }

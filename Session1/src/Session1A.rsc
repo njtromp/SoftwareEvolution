@@ -79,19 +79,79 @@ public GraphInfo makeGraph(GraphInfo info, \block(stmts)) {
 }
 
 public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock)) {
+	println("If");
 	return makeGraph(insertShortcut(info), ifBlock);
 }
 
 public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock, elseBlock)) {
+	println("If-Else");
 	partialGraph = makeGraph(insertChoice(info), ifBlock);
 	return makeGraph(<info.last+5, info.last+6, partialGraph.last, partialGraph.graph>, elseBlock);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \for(_, _, _, block)) {
-	return makeGraph(insertShortcut(info), block);
+public GraphInfo makeGraph(GraphInfo info, \switch(_, cases)) {
+	println("Switch");
+	return makeGraph(info, cases);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \case(_)) {
+	println("Case");
+	return insertShortcut(info);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \defaultCase()) {
+	println("Default");
+	return insertShortcut(info);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \for(_, _, body)) {
+	println("For");
+	return makeGraph(insertShortcut(info), body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \for(_, _, _, body)) {
+	println("For-Conditional");
+	return makeGraph(insertShortcut(info), body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \foreach(_, _, body)) {
+	println("Foreach");
+	return makeGraph(insertShortcut(info), body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \do(body, _)) {
+	println("Do");
+	return makeGraph(insertShortcut(info), body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \while(_, body)) {
+	println("While");
+	return makeGraph(insertShortcut(info), body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \try(body, _)) {
+	println("Try");
+	return makeGraph(info, body);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \try(tryBody, _, finalBody)) {
+	println("Try-Final");
+	return makeGraph(insertShortcut(makeGraph(info, tryBody)), finalBody);
+}
+
+public GraphInfo makeGraph(GraphInfo info, \catch(_, body)) {
+	println("Catch");
+	return makeGraph(insertShortcut(info), body);
 }
 
 public GraphInfo makeGraph(GraphInfo info, Statement stmt) {
+	return info;
+}
+
+public GraphInfo makeGraph(GraphInfo info, list[Statement] stmts) {
+	for (stmt <- stmts) {
+		info = makeGraph(info, stmt);
+	}
 	return info;
 }
 
@@ -109,19 +169,11 @@ public void testing() {
 			totalLines += sloc(body);
 		}
 	}
-	println("Total LOC [<totalLines>]");
+	println("Total loc [<totalLines>]");
 	visit (ast) {
-		case method(_, name, _, _, stmt) : println("[<name>] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
-		case constructor(name, _, _, stmt) : println("[Constructor] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
-		case initializer(stmt) : println("[Init] = [<sloc(stmt)>, <cyclomaticComplexity(stmt)>]");
+		case method(_, name, _, _, stmt) : println("Metrics for [<name>] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
+		case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
+		case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
 	}
-	println("Total LOC [<totalLines>]");
-	//visit (ast) {
-	//	case method(_, name, _, _, stmt) : {
-	//		//if (name == "containsLetter") {
-	//			//println("CC = [<cyclomaticComplexity(stmt)>]");
-	//		//}
-	//	}
-	//}
 	println("Done");
 }
