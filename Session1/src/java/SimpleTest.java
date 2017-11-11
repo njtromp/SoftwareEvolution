@@ -108,13 +108,62 @@ public class SimpleTest {
      * bla
      */
     public void anotherCCTest(int a, int b) {
-    	if (a > 10) {
-    		if (b > 10) {
-    			System.out.println();
-    		} else {
-    			System.out.println();
-    		}
-    	}
+	    	if (a > 10) {
+	    		if (b > 10) {
+	    			System.out.println();
+	    		} else {
+	    			System.out.println();
+	    		}
+	    	}
 		System.out.println();
+    }
+    
+    public void ifTest() {
+    		if (true) {
+    			System.out.println(1);
+    		} else if (false) {
+    			System.out.println(2);
+    		} else if (false) {
+    			System.out.println(3);
+    		} else {
+    			System.out.println(4);
+    		}
+    }
+    
+    public void infix(int a, int b) {
+    		if (a < 0 && b > 0) {
+    			System.out.println("Hello");
+    		}
+    }
+    
+    public void switchCC3() {
+        switch ((int)(Math.random()*10)) {
+	     	case 1 : System.out.println();
+	     		break;
+	     	case 2 : System.out.println();
+	     		break;
+	     	default : System.out.println();
+	     }
+    }
+    
+    public void checkIfIfGraph(int a, int b) {
+    		if (a < b) {
+    			System.out.println("Kleiner");
+    		}
+    		if (a > b) {
+    			System.out.println("Groter");
+    		}
+    }
+    
+    public void graphCheck(int a) {
+    		if (a != 0) {
+    			for (int i = 0; i < 10; i++) {
+  				System.out.println(i);
+    			}
+    		} else {
+    			while (a < 0) {
+    				a++;
+    			}
+    		}
     }
 }

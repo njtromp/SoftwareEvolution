@@ -11,7 +11,7 @@ public void enterDebug(bool debugOn) {
 	debug = debugOn;
 }
 
-public void leaveDebug() {
+public void exitDebug() {
 	<debug, stack> = pop(stack);
 }
 
