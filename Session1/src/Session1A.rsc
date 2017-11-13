@@ -5,6 +5,7 @@ import Set;
 import List;
 import String;
 import Relation;
+import util::Math;
 import util::ValueUI;
 import lang::java::m3::Core;
 import lang::java::m3::AST;
@@ -82,8 +83,8 @@ public int countLines(value body) {
 public void testing() {
 	//enterDebug(false);
 	
-	ast = createAstsFromEclipseProject(|project://Session1|, true);
-	//ast = createAstsFromEclipseProject(|project://SmallSql|, true);
+	//ast = createAstsFromEclipseProject(|project://Session1|, true);
+	ast = createAstsFromEclipseProject(|project://SmallSql|, true);
 	//ast = createAstFromFile(|project://SmallSql/src/smallsql/database/ExpressionFunctionTan.java|, true);
 	//text(ast);
 	int totalLines = 0;
@@ -95,13 +96,20 @@ public void testing() {
 	totalLines = sloc(ast);
 	println("Total loc [<totalLines>]");
 	println("SLOC (new) [<sloc(ast)>]");
+	int count = 0;
 	visit (ast) {
 		case m:method(_, name, _, _, stmt) : {
-			println("Metrics for [<name>] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+			if (name == "parseSQL") {
+				count += 1;
+			}
+			cc = cyclomaticComplexity(stmt);
+			ccwi = cyclomaticComplexityCWI(stmt); 
+			if (abs(cc - ccwi) > 10)
+				println("Metrics for [<name>] = [loc:<sloc(stmt)>, cc:<cc> (<ccwi>)] <count>");
 			//if (name == "graphCheck") text(m);
 		}
-		case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
-		case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+		//case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+		//case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
 	}
 
 	list[SLOCInfo] locs = [];

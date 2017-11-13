@@ -162,15 +162,15 @@ public class SimpleTest {
     }
     
     public void graphCheck(int a) {
-    		if (a != 0) {
-    			for (int i = 0; i < 10; i++) {
-  				System.out.println(i);
-    			}
-    		} else {
+//    		if (a != 0) {
+//    			for (int i = 0; i < 10; i++) {
+//  				System.out.println(i);
+//    			}
+//    		} else {
     			while (a < 0) {
     				a++;
     			}
-    		}
+//    		}
 //    		try {
 //    			new FileInputStream("");
 //    		} catch (IOException e) {
@@ -179,4 +179,5 @@ public class SimpleTest {
 //    			e.printStackTrace();
 //    		}
     }
+    
 }

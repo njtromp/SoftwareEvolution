@@ -53,6 +53,10 @@ public GraphInfo addNewNodeToEdge(Node entry, Node exit, GraphInfo info) {
 
 // Handling of the statements
 
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \label(_, body)) {
+	return makeGraph(entry, exit, info, body);
+}
+
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \block(stmts)) {
 	//dprintln("Block");
 	switch (size(stmts)) {
@@ -65,10 +69,18 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \block(stmts))
 	}
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(_, ifBlock)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \synchronizedStatement(_, stmt)) {
+	dprintln("Synchronized");
+	return makeGraph(entry, exit, info, stmt);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(expression, ifBlock)) {
 	dprintln("If");
+	//<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	//<ifNode, graph> = addNewNodeToEdge(newNode, exit, info);
+	//return makeGraph(newNode, ifNode, makeGraph(entry, newNode, <newNode, graph>, expression), ifBlock);
 	<ifNode, graph> = addNewNodeToEdge(entry, exit, info);
-	return makeGraph(entry, ifNode, <ifNode, graph>, ifBlock);
+	return makeGraph(ifNode, exit, makeGraph(entry, ifNode, <ifNode, graph>, expression), ifBlock);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(_, ifBlock, elseBlock)) {
@@ -141,6 +153,30 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \catch(_, body
 	dprintln("Catch");
 	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
 	return makeGraph(entry, newNode, <newNode, graph>, body);
+}
+
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, infix(left, "&&", right)) {
+	dprintln("Infix-&&");
+	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
+	return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, left), right);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, infix(left, "||", right)) {
+	dprintln("Infix-||");
+	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
+	return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, left), right);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \conditional(condition, ifExpr, elseExpr)) {
+	dprintln("Infix-||");
+	<ifNode, graph> = addNewNodeToEdge(entry, exit, removeEdge(entry, exit, info));
+	<elseNode, graph> = addNewNodeToEdge(entry, exit, <ifNode, graph>);
+	return makeGraph(entry, elseNode, makeGraph(entry, ifNode, <elseNode, graph>, ifExpr), elseExpr);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, Expression expression) {
+	return info;
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, Statement stmt) {
