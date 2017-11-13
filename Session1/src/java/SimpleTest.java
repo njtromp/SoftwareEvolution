@@ -3,6 +3,7 @@
  */
 package java;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -136,14 +137,19 @@ public class SimpleTest {
     		}
     }
     
-    public void switchCC3() {
-        switch ((int)(Math.random()*10)) {
-	     	case 1 : System.out.println();
-	     		break;
-	     	case 2 : System.out.println();
-	     		break;
-	     	default : System.out.println();
+    public void switchCC3(int a) {
+        switch (a) {
+	     	case 1 : break;
+	     	case 2 : break;
+	     	default :
 	     }
+    }
+    
+    public void ifElseIfElseCC3(int a) {
+    		if (a == 1) {
+    		} else if (a == 2) {
+    		} else {
+    		}
     }
     
     public void checkIfIfGraph(int a, int b) {
@@ -165,5 +171,12 @@ public class SimpleTest {
     				a++;
     			}
     		}
+//    		try {
+//    			new FileInputStream("");
+//    		} catch (IOException e) {
+//    			e.printStackTrace();
+//    		} catch (IOException e) {
+//    			e.printStackTrace();
+//    		}
     }
 }

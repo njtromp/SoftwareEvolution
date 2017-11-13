@@ -1,126 +1,169 @@
 module ControlFlowGraph
 
+import IO;
+import List;
 import lang::java::jdt::m3::AST;
 import analysis::graphs::Graph;
 import DebugPrint;
 
-public alias GraphInfo = tuple[int top, int bottom, int last, Graph[int] graph];
+public alias Node = int;
+public alias GraphInfo = tuple[Node last, Graph[Node] graph];
 
-public GraphInfo insertShortcut(GraphInfo info) {
-	Graph[int] g = info.graph;
-	// Remove inner connection
-	g -= <info.top, info.bottom>;
-	// Replace with new connections
-	g += <info.top, info.last+1>;
-	g += <info.last+1, info.last+2>;
-	g += <info.last+2, info.last+3>;
-	g += <info.last+3, info.last+4>;
-	g += <info.last+4, info.bottom>;
-	// Create shortcut flow
-	g += <info.last+1, info.last+4>;
-	// Continue at new inserted connection
-	return <info.last+2, info.last+3, info.last+4, g>;
+/**
+ * Registers a new node, the 'last' element contains the number of the new node.
+ */
+public GraphInfo addNewNode(GraphInfo info) {
+	<lastNode, graph> = info;
+	return <lastNode+1, graph>;
 }
 
-public GraphInfo insertChoice(GraphInfo info) {
-	Graph[int] g = info.graph;
-	// Remove inner connection
-	g -= <info.top, info.bottom>;
-	// Replace with new connections on the left hand side
-	g += <info.top, info.last+1>;
-	g += <info.last+1, info.last+2>;
-	g += <info.last+2, info.last+3>;
-	g += <info.last+3, info.last+4>;
-	g += <info.last+4, info.bottom>;
-	// Replace with new connections on the right hand side
-	g += <info.last+1, info.last+5>;
-	g += <info.last+5, info.last+6>;
-	g += <info.last+6, info.last+4>;
-	// Continue at new inserted connection on the left hand side
-	return <info.last+2, info.last+3, info.last+6, g>;
+/**
+ * Adds a edge to the graph
+ */
+public GraphInfo insertEdge(Node entry, Node exit, GraphInfo info) {
+	<lastNode, graph> = info;
+	graph += <entry, exit>;
+	return <lastNode, graph>;
 }
 
-public GraphInfo makeGraph(GraphInfo info, \block(stmts)) {
-	for (stmt <- stmts) {
-		info = makeGraph(info, stmt);
+/**
+ * Removes an edge.
+ */
+public GraphInfo removeEdge(Node entry, Node exit, GraphInfo info) {
+	<lastNode, graph> = info;
+	graph -= <entry, exit>;
+	return <lastNode, graph>;
+}
+
+/**
+ * Inserts a new node into an existing edge.
+ */
+public GraphInfo insertNewNodeIntoEdge(Node entry, Node exit, GraphInfo info) {
+	<newNode, graph> = addNewNode(info);
+	return insertEdge(entry, newNode, insertEdge(newNode, exit, removeEdge(entry, exit, <newNode, graph>)));
+}
+
+/**
+ * Adds a new 'parallel' node to an existing edge.
+ */
+public GraphInfo addNewNodeToEdge(Node entry, Node exit, GraphInfo info) {
+	<newNode, graph> = addNewNode(info);
+	return insertEdge(entry, newNode, insertEdge(newNode, exit, <newNode, graph>));
+}
+
+// Handling of the statements
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \block(stmts)) {
+	//dprintln("Block");
+	switch (size(stmts)) {
+		case 0 : return info;
+		case 1 : return makeGraph(entry, exit, info, head(stmts));
+		default : {
+			<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+			return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, head(stmts)), tail(stmts));
+		}
 	}
-	return info;
 }
 
-public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(_, ifBlock)) {
 	dprintln("If");
-	return makeGraph(insertShortcut(info), ifBlock);
+	<ifNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, ifNode, <ifNode, graph>, ifBlock);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \if(_, ifBlock, elseBlock)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(_, ifBlock, elseBlock)) {
 	dprintln("If-Else");
-	partialGraph = makeGraph(insertChoice(info), ifBlock);
-	return makeGraph(<info.last+5, info.last+6, partialGraph.last, partialGraph.graph>, elseBlock);
+	<ifNode, graph> = addNewNodeToEdge(entry, exit, removeEdge(entry, exit, info));
+	<elseNode, graph> = addNewNodeToEdge(entry, exit, <ifNode, graph>);
+	return makeGraph(entry, elseNode, makeGraph(entry, ifNode, <elseNode, graph>, ifBlock), elseBlock);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \switch(_, cases)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \switch(_, cases)) {
 	dprintln("Switch");
-	return makeGraph(info, cases);
+	return makeGraph(entry, exit, info, cases);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \case(_)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \case(_)) {
 	dprintln("Case");
-	return insertShortcut(info);
+	return addNewNodeToEdge(entry, exit, info);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \defaultCase()) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \defaultCase()) {
 	dprintln("Default");
-	return insertShortcut(info);
+	//return addNewNodeToEdge(entry, exit, info);
+	return info;
 }
 
-public GraphInfo makeGraph(GraphInfo info, \for(_, _, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \for(_, _, body)) {
 	dprintln("For");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \for(_, _, _, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \for(_, _, _, body)) {
 	dprintln("For-Conditional");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \foreach(_, _, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \foreach(_, _, body)) {
 	dprintln("Foreach");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \do(body, _)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \do(body, _)) {
 	dprintln("Do");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \while(_, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \while(_, body)) {
 	dprintln("While");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \try(body, _)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \try(body, catches)) {
 	dprintln("Try");
-	return makeGraph(info, body);
+	<catchNode, graph> = addNewNodeToEdge(entry, exit, info);
+	return makeGraph(catchNode, exit, makeGraph(entry, catchNode, <catchNode, graph>, body), catches);
 }
 
-public GraphInfo makeGraph(GraphInfo info, \try(tryBody, _, finalBody)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \try(tryBody, catches, finalBody)) {
 	dprintln("Try-Final");
-	return makeGraph(makeGraph(info, tryBody), finalBody);
+	<catchNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<finalNode, graph> = insertNewNodeIntoEdge(catchNode, exit, <catchNode, graph>);
+	return makeGraph(finalNode, exit, makeGraph(catchNode, finalNode, makeGraph(entry, catchNode, <finalNode, graph>, tryBody), catches), finalBody);
 }
 
-// TODO Not picked up ....
-public GraphInfo makeGraph(GraphInfo info, \catch(_, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \catch(_, body)) {
 	dprintln("Catch");
-	return makeGraph(insertShortcut(info), body);
+	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(GraphInfo info, Statement stmt) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, Statement stmt) {
+	//dprintln("Unhandled statement [<stmt>]");
 	return info;
 }
 
-public GraphInfo makeGraph(GraphInfo info, list[Statement] stmts) {
-	for (stmt <- stmts) {
-		info = makeGraph(info, stmt);
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, list[Statement] stmts) {
+	switch (size(stmts)) {
+		case 0 : return info;
+		case 1 : return makeGraph(entry, exit, info, head(stmts));
+		default : { 
+			<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+			return makeGraph(entry, newNode, makeGraph(newNode, exit, <newNode, graph>, tail(stmts)), head(stmts));
+		}
 	}
-	return info;
 }
+
+public Graph[Node] makeGraph(Statement stmt) {
+	dprintln("Making graph");
+	GraphInfo info = makeGraph(1, 2, <2, {<1,2>}>, stmt);
+	//iprintln(info.graph);
+	return info.graph;
+}
+
+

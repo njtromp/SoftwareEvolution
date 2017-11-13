@@ -15,30 +15,31 @@ import demo::McCabe; // :-) Lets see what we can do with it...
 import DebugPrint;
 import ControlFlowGraph;
 
+public int cyclomaticComplexityCWI(Statement stmt) {
+	// From: https://stackoverflow.com/questions/40064886/obtaining-cyclomatic-complexity
+	// See authors :-)
+    int cc = 1;
+    visit (stmt) {
+        case \if(_,_) : cc += 1;
+        case \if(_,_,_) : cc += 1;
+        case \case(_) : cc += 1;
+        case \defaultCase() : cc += 1;
+        case \do(_,_) : cc += 1;
+        case \while(_,_) : cc += 1;
+        case \for(_,_,_) : cc += 1;
+        case \for(_,_,_,_) : cc += 1;
+        case foreach(_,_,_) : cc += 1;
+        case \catch(_,_): cc += 1;
+        case \conditional(_,_,_): cc += 1;
+        case infix(_,"&&",_) : cc += 1;
+        case infix(_,"||",_) : cc += 1;
+    }
+    return cc;
+} 
+
 public int cyclomaticComplexity(Statement stmt) {
-	GraphInfo info = makeGraph(<1, 2, 2, {<1,2>}>, stmt);
-	//iprintln(info.graph);
-	return cyclomaticComplexity(info.graph);
-	
-	//// From: https://stackoverflow.com/questions/40064886/obtaining-cyclomatic-complexity
-	//// See authors :-)
- //   int result = 1;
- //   visit (stmt) {
- //       case \if(_,_) : result += 1;
- //       case \if(_,_,_) : result += 1;
- //       case \case(_) : result += 1;
- //       case \defaultCase() : result += 1;
- //       case \do(_,_) : result += 1;
- //       case \while(_,_) : result += 1;
- //       case \for(_,_,_) : result += 1;
- //       case \for(_,_,_,_) : result += 1;
- //       case foreach(_,_,_) : result += 1;
- //       case \catch(_,_): result += 1;
- //       case \conditional(_,_,_): result += 1;
- //       case infix(_,"&&",_) : result += 1;
- //       case infix(_,"||",_) : result += 1;
- //   }
- //   return result;
+	return cyclomaticComplexity(makeGraph(stmt));
+	//return cyclomaticComplexityCWI(stmt);	
 }
 
 alias SLOCInfo = tuple[str name, int sloc];
@@ -51,7 +52,23 @@ bool orderSlocs(SLOCInfo si1, SLOCInfo si2) {
 	} 
 }
 
-public int sloc(value body) {
+public int sloc(Statement stmt) {
+	return countLines(stmt);
+}
+
+public int sloc(Declaration decl) {
+	return countLines(decl);
+}
+
+public int sloc(list[Declaration] decls) {
+	return ( 0 | it + countLines(decl) | decl <- decls);
+}
+
+public int sloc(set[Declaration] decls) {
+	return ( 0 | it + countLines(decl) | decl <- decls);
+}
+
+public int countLines(value body) {
 	set[int] methodLines = {};
 	visit(body) {
 		case /loc l : if (l.scheme == "project") {
@@ -63,24 +80,28 @@ public int sloc(value body) {
 }
 
 public void testing() {
-	enterDebug(false);
+	//enterDebug(false);
 	
 	ast = createAstsFromEclipseProject(|project://Session1|, true);
 	//ast = createAstsFromEclipseProject(|project://SmallSql|, true);
 	//ast = createAstFromFile(|project://SmallSql/src/smallsql/database/ExpressionFunctionTan.java|, true);
 	//text(ast);
 	int totalLines = 0;
-	visit (ast) {
-		case class(name, _, _, body) : {
-			totalLines += sloc(body);
-		}
-	}
+	//visit (ast) {
+	//	case class(name, _, _, body) : {
+	//		totalLines += sloc(body);
+	//	}
+	//}
+	totalLines = sloc(ast);
 	println("Total loc [<totalLines>]");
 	println("SLOC (new) [<sloc(ast)>]");
 	visit (ast) {
-		case method(_, name, _, _, stmt) : println("Metrics for [<name>] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
-		case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
-		case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)>]");
+		case m:method(_, name, _, _, stmt) : {
+			println("Metrics for [<name>] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+			//if (name == "graphCheck") text(m);
+		}
+		case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+		case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexity(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
 	}
 
 	list[SLOCInfo] locs = [];
@@ -90,8 +111,9 @@ public void testing() {
 		}
 	}
 	//text(sort(locs, orderSlocs));
+	println((0 | it + l | <m, l> <- locs));
 
 	println("Done");
 	
-	exitDebug();
+	//exitDebug();
 }
