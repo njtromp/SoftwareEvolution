@@ -74,25 +74,25 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \synchronizedS
 	return makeGraph(entry, exit, info, stmt);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(expression, ifBlock)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(condition, ifBlock)) {
 	dprintln("If");
-	//<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
-	//<ifNode, graph> = addNewNodeToEdge(newNode, exit, info);
-	//return makeGraph(newNode, ifNode, makeGraph(entry, newNode, <newNode, graph>, expression), ifBlock);
-	<ifNode, graph> = addNewNodeToEdge(entry, exit, info);
-	return makeGraph(ifNode, exit, makeGraph(entry, ifNode, <ifNode, graph>, expression), ifBlock);
+	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<ifNode, graph> = addNewNodeToEdge(conditionNode, exit, <conditionNode, graph>);
+	return makeGraph(conditionNode, ifNode, makeGraph(entry, conditionNode, <ifNode, graph>, condition), ifBlock);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(_, ifBlock, elseBlock)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \if(condition, ifBlock, elseBlock)) {
 	dprintln("If-Else");
-	<ifNode, graph> = addNewNodeToEdge(entry, exit, removeEdge(entry, exit, info));
-	<elseNode, graph> = addNewNodeToEdge(entry, exit, <ifNode, graph>);
-	return makeGraph(entry, elseNode, makeGraph(entry, ifNode, <elseNode, graph>, ifBlock), elseBlock);
+	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<ifNode, graph> = insertNewNodeIntoEdge(conditionNode, exit, <conditionNode, graph>);
+	<elseNode, graph> = addNewNodeToEdge(conditionNode, exit, <ifNode, graph>);
+	return makeGraph(elseNode, exit, makeGraph(ifNode, exit, makeGraph(entry, conditionNode, <elseNode, graph>, condition), ifBlock), elseBlock);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \switch(_, cases)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \switch(condition, cases)) {
 	dprintln("Switch");
-	return makeGraph(entry, exit, info, cases);
+	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	return makeGraph(conditionNode, exit, makeGraph(entry, conditionNode, <conditionNode, graph>, condition), cases);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \case(_)) {
@@ -102,7 +102,6 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \case(_)) {
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \defaultCase()) {
 	dprintln("Default");
-	//return addNewNodeToEdge(entry, exit, info);
 	return info;
 }
 
@@ -112,10 +111,11 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \for(_, _, bod
 	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \for(_, _, _, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \for(_, condition, _, body)) {
 	dprintln("For-Conditional");
-	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
-	return makeGraph(entry, newNode, <newNode, graph>, body);
+	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, <conditionNode, graph>);
+	return makeGraph(conditionNode, newNode, makeGraph(entry, conditionNode, <newNode, graph>, condition), body);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \foreach(_, _, body)) {
@@ -124,16 +124,18 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \foreach(_, _,
 	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \do(body, _)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \do(body, condition)) {
 	dprintln("Do");
-	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
-	return makeGraph(entry, newNode, <newNode, graph>, body);
+	<doNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<conditionNode, graph> = addNewNodeToEdge(doNode, exit, <doNode, graph>);
+	return makeGraph(doNode, conditionNode, makeGraph(entry, doNode, <conditionNode, graph>, body), condition);
 }
 
-public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \while(_, body)) {
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \while(condition, body)) {
 	dprintln("While");
-	<newNode, graph> = addNewNodeToEdge(entry, exit, info);
-	return makeGraph(entry, newNode, <newNode, graph>, body);
+	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+	<whileNode, graph> = addNewNodeToEdge(conditionNode, exit, <conditionNode, graph>);
+	return makeGraph(conditionNode, whileNode, makeGraph(entry, conditionNode, <whileNode, graph>, condition), body);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \try(body, catches)) {
@@ -155,17 +157,48 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \catch(_, body
 	return makeGraph(entry, newNode, <newNode, graph>, body);
 }
 
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \return(expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \bracket(expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, infix(left, "&&", right)) {
 	dprintln("Infix-&&");
-	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
-	return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, left), right);
+	<leftNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
+	<rightNode, graph> = addNewNodeToEdge(entry, exit, <leftNode, graph>);
+	return makeGraph(entry, rightNode, makeGraph(entry, leftNode, <rightNode, graph>, left), right);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, infix(left, "||", right)) {
 	dprintln("Infix-||");
-	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
-	return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, left), right);
+	<leftNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
+	<rightNode, graph> = addNewNodeToEdge(entry, exit, <leftNode, graph>);
+	return makeGraph(entry, rightNode, makeGraph(entry, leftNode, <rightNode, graph>, left), right);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, infix(left, _, right)) {
+	dprintln("Infix");
+	<infixNode, graph> = insertNewNodeIntoEdge(entry, exit, info); 
+	return makeGraph(infixNode, exit, makeGraph(entry, infixNode, <infixNode, graph>, left), right);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \postfix(expression, _)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \prefix(_, expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \variable(_, _, expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \qualifiedName(_, expression)) {
+	return makeGraph(entry, exit, info, expression);
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \conditional(condition, ifExpr, elseExpr)) {
@@ -175,8 +208,40 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \conditional(c
 	return makeGraph(entry, elseNode, makeGraph(entry, ifNode, <elseNode, graph>, ifExpr), elseExpr);
 }
 
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \assignment(_, _, expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \cast(_, expression)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \fieldAccess(_, expression, _)) {
+	return makeGraph(entry, exit, info, expression);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \methodCall(_, _, args)) {
+	return makeGraph(entry, exit, info, args);
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, \methodCall(_, _, _, args)) {
+	return makeGraph(entry, exit, info, args);
+}
+
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, Expression expression) {
+	//dprintln("Unhandled expression [<expression>]");
 	return info;
+}
+
+public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, list[Expression] exprs) {
+	switch (size(exprs)) {
+		case 0 : return info;
+		case 1 : return makeGraph(entry, exit, info, head(exprs));
+		default : { 
+			<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
+			return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, head(exprs)), tail(exprs));
+		}
+	}
 }
 
 public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, Statement stmt) {
@@ -190,7 +255,7 @@ public GraphInfo makeGraph(Node entry, Node exit, GraphInfo info, list[Statement
 		case 1 : return makeGraph(entry, exit, info, head(stmts));
 		default : { 
 			<newNode, graph> = insertNewNodeIntoEdge(entry, exit, info);
-			return makeGraph(entry, newNode, makeGraph(newNode, exit, <newNode, graph>, tail(stmts)), head(stmts));
+			return makeGraph(newNode, exit, makeGraph(entry, newNode, <newNode, graph>, head(stmts)), tail(stmts));
 		}
 	}
 }
