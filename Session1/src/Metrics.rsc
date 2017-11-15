@@ -4,7 +4,7 @@ import IO;
 import List;
 
 public data MethodMetrics = MethodMetrics(int sloc, int ccfg, int ccwi);
-public data Complexity = Complexity(int low, int moderate, int high, int veryHigh);
+public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
 
 public int sloc(list[MethodMetrics] metrics) {
 	return ( 0 | it + m.sloc | m <-metrics);
@@ -24,46 +24,83 @@ public void printVolumeRating(str name, int sloc) {
 	println("Volume (<name>):       <rating>");
 }
 
-public Complexity computeComplexity(int totalSLOC, list[MethodMetrics] metrics, int (MethodMetrics) cc) {
-	list[MethodMetrics] lowRiskMethods = [];
-	list[MethodMetrics] moderateRiskMethods = [];
-	list[MethodMetrics] highRiskMethods = [];
-	list[MethodMetrics] veryHighRiskMethods = [];
+public MetricsDistribution computeUnitSize(int totalSLOC, list[MethodMetrics] metrics) {
+	list[MethodMetrics] lowMethods = [];
+	list[MethodMetrics] moderateMethods = [];
+	list[MethodMetrics] highMethods = [];
+	list[MethodMetrics] veryHighMethods = [];
 	for (m <- metrics) {
-		if (cc(m) <= 10) {
-			lowRiskMethods += m;
-		} else if (cc(m) <= 20) {
-			moderateRiskMethods += m;
-		} else if (cc(m) <= 50) {
-			highRiskMethods += m;
+		if (m.sloc <= 15) {
+			lowMethods += m;
+		} else if (m.sloc <= 30) {
+			moderateMethods += m;
+		} else if (m.sloc <= 60) {
+			highMethods += m;
 		} else  {
-			veryHighRiskMethods += m;
+			veryHighMethods += m;
 		}
 	}
-	return Complexity(sloc(lowRiskMethods) * 100 / totalSLOC,
-		sloc(moderateRiskMethods) * 100 / totalSLOC,
-		sloc(highRiskMethods) * 100 / totalSLOC,
-		sloc(veryHighRiskMethods) * 100 / totalSLOC
+	return MetricsDistribution(sloc(lowMethods) * 100 / totalSLOC,
+		sloc(moderateMethods) * 100 / totalSLOC,
+		sloc(highMethods) * 100 / totalSLOC,
+		sloc(veryHighMethods) * 100 / totalSLOC
 	);	
 }
 
-public void printComplexityRating(str name, Complexity complexity) {
+public MetricsDistribution computeComplexity(int totalSLOC, list[MethodMetrics] metrics, int (MethodMetrics) cc) {
+	list[MethodMetrics] lowMethods = [];
+	list[MethodMetrics] moderateMethods = [];
+	list[MethodMetrics] highMethods = [];
+	list[MethodMetrics] veryHighMethods = [];
+	for (m <- metrics) {
+		if (cc(m) <= 10) {
+			lowMethods += m;
+		} else if (cc(m) <= 20) {
+			moderateMethods += m;
+		} else if (cc(m) <= 50) {
+			highMethods += m;
+		} else  {
+			veryHighMethods += m;
+		}
+	}
+	return MetricsDistribution(sloc(lowMethods) * 100 / totalSLOC,
+		sloc(moderateMethods) * 100 / totalSLOC,
+		sloc(highMethods) * 100 / totalSLOC,
+		sloc(veryHighMethods) * 100 / totalSLOC
+	);	
+}
+
+public void printUnitSizeRating(MetricsDistribution distribution) {
 	str rating = "--";
-	if (complexity.veryHigh == 0 && complexity.high == 0 && complexity.moderate <= 25) {
+	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
 		rating = "++";
-	} else if (complexity.veryHigh == 0 && complexity.high <= 5 && complexity.moderate <= 30) {
-		rating = "+";
-	} else if (complexity.veryHigh == 0 && complexity.high <= 10 && complexity.moderate <= 40) {
-		rating = "o";
-	} else if (complexity.veryHigh <= 5 && complexity.high <= 15 && complexity.moderate <= 50) {
-		rating = "-";
+	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
+		rating = " +";
+	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
+		rating = " o";
+	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
+		rating = " -";
+	}
+	println("Unit size:        <rating>");
+}
+
+public void printComplexityRating(str name, MetricsDistribution distribution) {
+	str rating = "--";
+	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
+		rating = "++";
+	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
+		rating = " +";
+	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
+		rating = " o";
+	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
+		rating = " -";
 	}
 	println("Complexity (<name>): <rating>");
 }
 
-public void printComplexityProfile(Complexity complexity) {
-	println("Very High: <complexity.veryHigh>");
-	println("High:      <complexity.high>");
-	println("Mod:       <complexity.moderate>");
-	println("Low:       <complexity.low>");
+public void printComplexityProfile(MetricsDistribution distribution) {
+	println("Very High: <distribution.veryHigh>");
+	println("High:      <distribution.high>");
+	println("Mod:       <distribution.moderate>");
+	println("Low:       <distribution.low>");
 }

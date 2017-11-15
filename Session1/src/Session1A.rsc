@@ -27,7 +27,7 @@ public void testing() {
 	//ast = createAstsFromEclipseProject(|project://HsqlDB|, true);
 	println("ASTs created");
 
-	println("Analysing...");
+	print("Analysing");
 	
 	list[MethodMetrics] metrics = [];
 	visit (ast) {
@@ -50,28 +50,35 @@ public void testing() {
 			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
 		}
 	}
+	print(".");
 	totalSLOC = sloc(ast);
+	print(".");
 
 	// Volume rating
 	totalMethodSLOC = ( 0 | it + m.sloc | m <- metrics);
+	print(".");
 	
 	// Unit size rating
+	unitSizes = computeUnitSize(totalMethodSLOC, metrics);
+	print(".");
 	
 	// Complexity rating
 	int cfgCC(MethodMetrics m) = m.ccfg;
 	cfgComplexity = computeComplexity(totalMethodSLOC, metrics, cfgCC);
+	print(".");
 	int cwiCC(MethodMetrics m) = m.ccwi;
 	cwiComplexity = computeComplexity(totalMethodSLOC, metrics, cwiCC);
+	print(".");
 
-	println("Analysis done.\n");
+	println("\nAnalysis done.\n");
 	// Reporting
 	println("==================================================");
 	println("Nico Tromp & Rob Kunst.");
 	println("==================================================");
 	printVolumeRating("M", totalMethodSLOC);	
 	printVolumeRating("T", totalMethodSLOC);	
-	
-	println("Unit size:         ?");
+
+	printUnitSizeRating(unitSizes);	
 		
 	printComplexityRating("CFG", cfgComplexity);	
 	printComplexityRating("CWI", cwiComplexity);	
@@ -80,6 +87,10 @@ public void testing() {
 	println("Volume profile <totalMethodSLOC>/<totalSLOC> (methods/total) lines of code");
 	println();
 	println("Unit size profile(s)");
+	println();
+
+	println("Unit size profile");
+	printComplexityProfile(unitSizes);
 	println();
 
 	println("Complexity profile (CFG)");
