@@ -7,6 +7,12 @@ public str removeEmptyLines(str text) {
 	};
 }
 
+public str removeLeadingSpaces(str text) {
+	return visit(text) {
+		case /^\s+/ => ""
+	}
+}
+
 public str removeMultiLineComments(str text) {
 	return visit(text) {
 		case /\/\*([^\*]|(\*+[^*\/]))*\*+\// => ""
@@ -54,3 +60,5 @@ test bool test_RN_ConvertToNix()  = convertToNix("_\r\n_")   == "_\n\n_";
 test bool test_RNR_ConvertToNix() = convertToNix("_\r\n\r_") == "_\n\n\n_";
 test bool test_NR_ConvertToNix()  = convertToNix("_\n\r_")   == "_\n\n_";
 test bool test_NRN_ConvertToNix() = convertToNix("_\n\r\n_") == "_\n\n\n_";
+
+test bool testRemoveLeadingSpaces() = removeLeadingSpaces(" a\n  b") == "a\nb";
