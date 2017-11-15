@@ -12,12 +12,10 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import analysis::graphs::Graph;
-import SLOC;
 import ControlFlowGraph;
+import SLOC;
 import CyclomaticComplexity;
 import Visualize;
-
-public map[str, int] cwiStats = ();
 
 public data MethodMetrics = MethodMetrics(int sloc, int ccfg, int ccwi);
 public data Complexity = Complexity(int low, int moderate, int high, int veryHigh);
@@ -47,8 +45,16 @@ public void testing() {
 				//render(createVisualisation(makeGraph(stmt)));
 			
 		}
-		//case constructor(name, _, _, stmt) : println("Metrics [Constructor] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexityCFG(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
-		//case initializer(stmt) : println("Metrics [Init] = [loc:<sloc(stmt)>, cc:<cyclomaticComplexityCFG(stmt)> (<cyclomaticComplexityCWI(stmt)>)]");
+		case c:constructor(name, _, _, stmt) : {
+			ccfg = cyclomaticComplexityCFG(stmt);
+			ccwi = cyclomaticComplexityCWI(stmt);
+			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
+		}
+		case i:initializer(stmt) : {
+			ccfg = cyclomaticComplexityCFG(stmt);
+			ccwi = cyclomaticComplexityCWI(stmt);
+			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
+		}
 	}
 	totalSLOC = sloc(ast);
 
@@ -58,8 +64,10 @@ public void testing() {
 	// Unit size rating
 	
 	// Complexity rating
-	cfgComplexity = computeCFGComplexity(totalMethodSLOC, metrics);
-	cwiComplexity = computeCWIComplexity(totalMethodSLOC, metrics);
+	int cfgCC(MethodMetrics m) = m.ccfg;
+	cfgComplexity = computeComplexity(totalMethodSLOC, metrics, cfgCC);
+	int cwiCC(MethodMetrics m) = m.ccwi;
+	cwiComplexity = computeComplexity(totalMethodSLOC, metrics, cwiCC);
 
 	println("Analysis done.\n");
 	// Reporting
@@ -105,40 +113,17 @@ public void printVolumeRating(str name, int sloc) {
 	println("Volume (<name>):       <rating>");
 }
 
-public Complexity computeCFGComplexity(int totalSLOC, list[MethodMetrics] metrics) {
+public Complexity computeComplexity(int totalSLOC, list[MethodMetrics] metrics, int (MethodMetrics) cc) {
 	list[MethodMetrics] lowRiskMethods = [];
 	list[MethodMetrics] moderateRiskMethods = [];
 	list[MethodMetrics] highRiskMethods = [];
 	list[MethodMetrics] veryHighRiskMethods = [];
 	for (m <- metrics) {
-		if (m.ccfg <= 10) {
+		if (cc(m) <= 10) {
 			lowRiskMethods += m;
-		} else if (m.ccfg <= 20) {
+		} else if (cc(m) <= 20) {
 			moderateRiskMethods += m;
-		} else if (m.ccfg <= 50) {
-			highRiskMethods += m;
-		} else  {
-			veryHighRiskMethods += m;
-		}
-	}
-	return Complexity(sloc(lowRiskMethods) * 100 / totalSLOC,
-		sloc(moderateRiskMethods) * 100 / totalSLOC,
-		sloc(highRiskMethods) * 100 / totalSLOC,
-		sloc(veryHighRiskMethods) * 100 / totalSLOC
-	);	
-}
-
-public Complexity computeCWIComplexity(int totalSLOC, list[MethodMetrics] metrics) {
-	list[MethodMetrics] lowRiskMethods = [];
-	list[MethodMetrics] moderateRiskMethods = [];
-	list[MethodMetrics] highRiskMethods = [];
-	list[MethodMetrics] veryHighRiskMethods = [];
-	for (m <- metrics) {
-		if (m.ccwi <= 10) {
-			lowRiskMethods += m;
-		} else if (m.ccwi <= 20) {
-			moderateRiskMethods += m;
-		} else if (m.ccwi <= 50) {
+		} else if (cc(m) <= 50) {
 			highRiskMethods += m;
 		} else  {
 			veryHighRiskMethods += m;
