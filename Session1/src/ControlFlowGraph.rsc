@@ -6,17 +6,15 @@ import List;
 import Relation;
 import lang::java::jdt::m3::AST;
 import analysis::graphs::Graph;
-import DebugPrint;
 
 public alias Node = int;
 public alias CFG = Graph[Node];
-public map[str, int] ccStats = ();
 
 /**
  * Registers a new node, the 'last' element contains the number of the new node.
  */
 public Node addNewNode(CFG graph) {
-	return size(carrier(graph)) + 1;
+	return max(carrier(graph)) + 1;
 }
 
 /**
@@ -56,7 +54,6 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \label(_, body)) {
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \block(stmts)) {
-	//dprintln("Block");
 	switch (size(stmts)) {
 		case 0 : return graph;
 		case 1 : return makeGraph(entry, exit, graph, head(stmts));
@@ -68,21 +65,16 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \block(stmts)) {
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \synchronizedStatement(_, stmt)) {
-	dprintln("Synchronized");
 	return makeGraph(entry, exit, graph, stmt);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \if(condition, ifBlock)) {
-	dprintln("If");
-    ccStats["If"] ? 0 += 1;
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<ifNode, graph> = addNewNodeToEdge(conditionNode, exit, graph);
 	return makeGraph(conditionNode, ifNode, makeGraph(entry, conditionNode, graph, condition), ifBlock);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \if(condition, ifBlock, elseBlock)) {
-	dprintln("If-Else");
-    ccStats["If-Else"] ? 0 += 1;
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<ifNode, graph> = insertNewNodeIntoEdge(conditionNode, exit, graph);
 	<elseNode, graph> = addNewNodeToEdge(conditionNode, exit, graph);
@@ -90,78 +82,59 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \if(condition, ifBlock, e
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \switch(condition, cases)) {
-	dprintln("Switch");
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	return makeGraph(conditionNode, exit, makeGraph(entry, conditionNode, graph, condition), cases);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \case(_)) {
-	dprintln("Case");
-    ccStats["Case"] ? 0 += 1;
 	<_, graph> = addNewNodeToEdge(entry, exit, graph);
 	return graph;
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \defaultCase()) {
-	dprintln("Default");
-    ccStats["Default"] ? 0 += 1;
 	return graph;
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \for(_, _, body)) {
-	dprintln("For");
-    ccStats["For"] ? 0 += 1;
 	<newNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(entry, newNode, graph, body);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \for(_, condition, _, body)) {
-	dprintln("For-Conditional");
-    ccStats["For-Conditional"] ? 0 += 1;
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<newNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(conditionNode, newNode, makeGraph(entry, conditionNode, graph, condition), body);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \foreach(_, _, body)) {
-	dprintln("Foreach");
-    ccStats["Foreach"] ? 0 += 1;
 	<newNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(entry, newNode, graph, body);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \do(body, condition)) {
-	dprintln("Do");
-    ccStats["Do"] ? 0 += 1;
 	<doNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<conditionNode, graph> = addNewNodeToEdge(doNode, exit, graph);
 	return makeGraph(doNode, conditionNode, makeGraph(entry, doNode, graph, body), condition);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \while(condition, body)) {
-	dprintln("While");
-    ccStats["While"] ? 0 += 1;
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<whileNode, graph> = addNewNodeToEdge(conditionNode, exit, graph);
 	return makeGraph(conditionNode, whileNode, makeGraph(entry, conditionNode, graph, condition), body);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \try(body, catches)) {
-	dprintln("Try");
 	<catchNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(catchNode, exit, makeGraph(entry, catchNode, graph, body), catches);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \try(tryBody, catches, finalBody)) {
-	dprintln("Try-Final");
 	<catchNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<finalNode, graph> = insertNewNodeIntoEdge(catchNode, exit, graph);
 	return makeGraph(finalNode, exit, makeGraph(catchNode, finalNode, makeGraph(entry, catchNode, graph, tryBody), catches), finalBody);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \catch(_, body)) {
-	dprintln("Catch");
-    ccStats["Catch"] ? 0 += 1;
 	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	return makeGraph(entry, newNode, graph, body);
 }
@@ -175,23 +148,18 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \bracket(expression)) {
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, infix(left, "&&", right)) {
-	dprintln("Infix-&&");
-    ccStats["Infix-&&"] ? 0 += 1;
 	<leftNode, graph> = insertNewNodeIntoEdge(entry, exit, graph); 
 	<rightNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(entry, rightNode, makeGraph(entry, leftNode, graph, left), right);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, infix(left, "||", right)) {
-	dprintln("Infix-||");
-    ccStats["Infix-||"] ? 0 += 1;
 	<leftNode, graph> = insertNewNodeIntoEdge(entry, exit, graph); 
 	<rightNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(entry, rightNode, makeGraph(entry, leftNode, graph, left), right);
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, infix(left, _, right)) {
-	dprintln("Infix");
 	<infixNode, graph> = insertNewNodeIntoEdge(entry, exit, graph); 
 	return makeGraph(infixNode, exit, makeGraph(entry, infixNode, graph, left), right);
 }
@@ -213,8 +181,6 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \qualifiedName(_, express
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, \conditional(condition, ifExpr, elseExpr)) {
-	dprintln("Conditional");
-    ccStats["Conditional"] ? 0 += 1;
 	<conditionNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	<ifNode, graph> = insertNewNodeIntoEdge(conditionNode, exit, graph);
 	<elseNode, graph> = addNewNodeToEdge(conditionNode, exit, graph);
@@ -278,7 +244,6 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, list[Statement] stmts) {
 }
 
 public CFG makeGraph(Statement stmt) {
-	dprintln("Making graph");
 	Node entry = 1;
 	Node exit = 2;
 	return makeGraph(entry, exit, {<entry, exit>}, stmt);
