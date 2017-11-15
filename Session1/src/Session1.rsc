@@ -11,6 +11,7 @@ import lang::java::jdt::m3::AST;
 
 import DebugPrint;
 import CyclomaticComplexity;
+import FileIndexer;
 
 import util::StringCleaner;
 import util::Metrics;
@@ -26,6 +27,10 @@ public void determineMetrics(loc file) {
 
 public void runMetrics() {
 	determineMetrics(|project://SmallSql|);
+}
+
+public void findDuplicates() {
+	parseFiles(|project://SmallSql|);
 }
 
 public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
