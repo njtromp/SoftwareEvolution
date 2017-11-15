@@ -212,7 +212,6 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, \expressionStatement(expr
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, Expression expression) {
-	//dprintln("Unhandled expression [<expression>]");
 	return graph;
 }
 
@@ -228,7 +227,6 @@ public CFG makeGraph(Node entry, Node exit, CFG graph, list[Expression] exprs) {
 }
 
 public CFG makeGraph(Node entry, Node exit, CFG graph, Statement stmt) {
-	//dprintln("Unhandled statement [<stmt>]");
 	return graph;
 }
 
