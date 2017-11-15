@@ -32,7 +32,7 @@ public str convertToNix(str text) {
 }
 
 public str cleanFile(str file) {
-	return removeEmptyLines(removeMultiLineComments(removeSingleLineComments(convertToNix(file))));
+	return removeLeadingSpaces(removeEmptyLines(removeMultiLineComments(removeSingleLineComments(convertToNix(file)))));
 }
 
 // Ugly test names
