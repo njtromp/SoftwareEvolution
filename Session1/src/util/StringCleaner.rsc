@@ -9,7 +9,7 @@ public str removeEmptyLines(str text) {
 
 public str removeLeadingSpaces(str text) {
 	return visit(text) {
-		case /^\s+/ => ""
+		case /^\s+/m => " "
 	}
 }
 
