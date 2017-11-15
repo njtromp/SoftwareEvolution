@@ -89,15 +89,14 @@ public void testing() {
 	}
 	println("Analysis done.");
 	
+	//println("Max CC difference [<maxDifference>] occured in [<fullMethodName>]");
+	//println("========== CWI =============");
+	//println(cwiStats);
+	//println("=========== CC =============");
+	//println(ccStats);
 	
-	println("Max CC difference [<maxDifference>] occured in [<fullMethodName>]");
-	println("========== CWI =============");
-	println(cwiStats);
-	println("=========== CC =============");
-	println(ccStats);
-	
-	//totalSLOC = sloc(ast);
-	totalSLOC = ( 0 | it + m.sloc | m <- metrics);
+	totalSLOC = sloc(ast);
+	totalMethodSLOC = ( 0 | it + m.sloc | m <- metrics);
 	println("Total SLOC [<totalSLOC>]");
 	if (totalSLOC < 66000) {
 		println("Volume: ++");
@@ -126,10 +125,23 @@ public void testing() {
 			veryHighRiskMethods += m;
 		}
 	}
-	println("Low       <sloc(lowRiskMethods)*100/totalSLOC>");
-	println("Mod       <sloc(moderateRiskMethods)*100/totalSLOC>");
-	println("High      <sloc(highRiskMethods)*100/totalSLOC>");
-	println("Very High <sloc(veryHighRiskMethods)*100/totalSLOC>");
+	println("Low       <sloc(lowRiskMethods)*100/totalMethodSLOC>");
+	println("Mod       <sloc(moderateRiskMethods)*100/totalMethodSLOC>");
+	println("High      <sloc(highRiskMethods)*100/totalMethodSLOC>");
+	println("Very High <sloc(veryHighRiskMethods)*100/totalMethodSLOC>");
+	
+	//if (sloc(veryHighRiskMethods)*100/totalMethodSLOC == 5) {
+	//	println("Complexity: ++");
+	//} else if (sloc(veryHighRiskMethods)*100/totalMethodSLOC > 0) {
+	//	println("Complexity: -");
+	//} else if (sloc(veryHighRiskMethods)*100/totalMethodSLOC > 10) {
+	//	println("Complexity: o");
+	//} else if (sloc(veryHighRiskMethods)*100/totalMethodSLOC > 0) {
+	//	println("Complexity: +");
+	//} else if (sloc(veryHighRiskMethods)*100/totalMethodSLOC > 0) {
+	//	println("Complexity: ++");
+	//}
+	
 
 	println("Done");
 	
