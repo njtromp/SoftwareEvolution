@@ -28,7 +28,7 @@ public int sloc(set[Declaration] decls) {
 }
 
 public int countLines(value body) {
-	set[int] methodLines = {};
+    set[int] methodLines = {};
 	visit(body) {
 		case /loc l : if (l.scheme == "project") {
 			methodLines += {l.begin.line};
@@ -38,7 +38,7 @@ public int countLines(value body) {
 	return size(methodLines);
 }
 
-public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
+public int sloc(set[loc] files) = sum([ linesOfCode(readFile(file)) | file <- files]);
 
 private int linesOfCode(str text) {
 	return size(split("\n", cleanupFile(text)));
