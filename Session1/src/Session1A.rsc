@@ -18,13 +18,30 @@ import util::FileSystem;
 import ControlFlowGraph;
 import CyclomaticComplexity;
 import util::StringCleaner;
-import Visualize;
+import util::Visualize;
 
 private bool isATest(str path, set[str] testDirs) {
 	for (testDir <- testDirs) {
 		if (contains(path, testDir)) return true;
 	}
 	return false;
+}
+
+private int countAsserts(Statement stmt) {
+	asserts = 0;
+	top-down visit(stmt) {
+		case m:\methodCall(_, name, _) : {
+			if (startsWith(name, "assert")) {
+				asserts += 1;
+			}
+		}
+		case \methodCall(_, _, name, _) : {
+			if (startsWith(name, "assert")) {
+				asserts += 1;
+			}
+		}
+	}
+	return asserts;
 }
 
 public void testing() {
@@ -48,6 +65,7 @@ public void testing() {
 	list[MethodMetrics] metrics = [];
 	className = "";
 	isTest = false;
+	numberOfAsserts = 0;
 	top-down visit (ast) {
 		case cl:class(_, _, _, _) : {
 			className = cl.decl.path;
@@ -71,6 +89,9 @@ public void testing() {
 			msloc = sloc(mtd);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
+			if (isTest) {
+				numberOfAsserts += countAsserts(stmt);
+			};
 			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
 			//println("[<className>/<name>()] [<msloc>]");
 		}
@@ -78,7 +99,8 @@ public void testing() {
 	print(".");
 
 	// Volume 
-	totalSLOC = sloc(find(projectUnderTest, "java"));
+	//totalSLOC = sloc(find(projectUnderTest, "java"));
+	totalSLOC = 10000;
 	print(".");
 	
 	// Unit size rating
@@ -125,6 +147,7 @@ public void testing() {
 	println();
 	
 	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
+	println("Number of asserts [<numberOfAsserts>]");
 	
-	println("Done");
+	println("\nDone");
 }
