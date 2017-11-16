@@ -14,7 +14,7 @@ import lang::java::jdt::m3::Core;
 import analysis::graphs::Graph;
 import SLOC;
 import Metrics;
-import FileUtil;
+import util::FileSystem;
 import ControlFlowGraph;
 import CyclomaticComplexity;
 import util::StringCleaner;
@@ -78,7 +78,7 @@ public void testing() {
 	print(".");
 
 	// Volume 
-	totalSLOC = sloc(findAllFiles(projectUnderTest, "java"));
+	totalSLOC = sloc(find(projectUnderTest, "java"));
 	print(".");
 	
 	// Unit size rating
