@@ -35,7 +35,7 @@ public void printVolumeRating(int sloc) {
 	} else if (sloc < 1310000) {
 		rating = " -";
 	}
-	println("Volume:          <rating>");
+	println("Volume:           <rating>");
 }
 
 public MetricsDistribution computeUnitSize(int totalSLOC, list[MethodMetrics] metrics) {

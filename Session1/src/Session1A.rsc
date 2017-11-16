@@ -51,6 +51,7 @@ public void testing() {
 	top-down visit (ast) {
 		case cl:class(_, _, _, _) : {
 			className = cl.decl.path;
+			isTest = isATest(cl.src.path, testFolders);
 		}
 		case ctor:constructor(name, _, _, stmt) : {
 			msloc = sloc(ctor);
@@ -94,8 +95,6 @@ public void testing() {
 
 	println("\nAnalysis done.\n");
 	
-	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
-	
 	// Reporting
 	println("==================================================");
 	println("Nico Tromp & Rob Kunst.");
@@ -124,6 +123,8 @@ public void testing() {
 	println("Complexity profile (CWI)");
 	printComplexityProfile(cwiComplexity);
 	println();
+	
+	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
 	
 	println("Done");
 }
