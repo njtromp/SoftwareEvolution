@@ -18,23 +18,48 @@ import CyclomaticComplexity;
 import Metrics;
 import Visualize;
 
+private bool isATest(str path, set[str] testDirs) {
+	for (testDir <- testDirs) {
+		if (contains(path, testDir)) return true;
+	}
+	return false;
+}
+
 public void testing() {
 	
 	println("Creating ASTs");
-	//ast = createAstsFromEclipseProject(|project://Session1|, true);
+
+	//ast = createAstsFromEclipseProject(|project://RascalTest|, true);
+	//testDirs = {"/src/rascal/test/"};
+
 	//ast = createAstFromFile(|project://SmallSql/src/smallsql/database/ExpressionArithmetic.java|, true);
+	//testDirs = {"/src/smallsql/junit/"};
+
 	ast = createAstsFromEclipseProject(|project://SmallSql|, true);
+	testDirs = {"/src/smallsql/junit/"};
+
 	//ast = createAstsFromEclipseProject(|project://HsqlDB|, true);
+	//testDirs = {"/src/org/hsqldb/test/"};
 	println("ASTs created");
 
 	print("Analysing");
 	
 	list[MethodMetrics] metrics = [];
+	bool isTest = false;
+	packageName = "";
+	className = "";
 	visit (ast) {
+		case \package(name) : packageName = name;
+		case \package(_, name) : packageName = name;
+		case c:class(name, _, _, _) : {
+			className = name;
+			println("[<packageName>/<className>]");
+			isTest = isATest(c.src.path, testDirs);
+		}
 		case m:method(_, name, _, _, stmt) : {
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
+			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
 			//if (name == "ifTest")
 				//render(createVisualisation(makeGraph(stmt)));
 			
@@ -42,12 +67,12 @@ public void testing() {
 		case c:constructor(name, _, _, stmt) : {
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
+			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
 		}
 		case i:initializer(stmt) : {
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(sloc(stmt), ccfg, ccwi);
+			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
 		}
 	}
 	print(".");
@@ -71,6 +96,15 @@ public void testing() {
 	print(".");
 
 	println("\nAnalysis done.\n");
+	
+	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
+	
+	//printReport();
+	
+	println("Done");
+}
+
+private void printReport() {
 	// Reporting
 	println("==================================================");
 	println("Nico Tromp & Rob Kunst.");
@@ -100,6 +134,4 @@ public void testing() {
 	println("Complexity profile (CWI)");
 	printComplexityProfile(cwiComplexity);
 	println();
-	
-	println("Done");
 }
