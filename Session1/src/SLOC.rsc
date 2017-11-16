@@ -1,21 +1,18 @@
 module SLOC
 
+import IO;
 import Set;
-import lang::java::jdt::m3::AST;
-import lang::java::jdt::m3::Core;
-
-alias SLOCInfo = tuple[str name, int sloc];
-
-public bool orderSlocs(SLOCInfo si1, SLOCInfo si2) {
-	switch (<si1.sloc > si2.sloc, si1.name > si2.name>) {
-		case <true, _> : return true;
-		case <false, true> : return true;
-		default : return false;
-	} 
-}
+import List;
+import String;
+import lang::java::m3::AST;
+import util::StringCleaner;
 
 public int sloc(Statement stmt) {
 	return countLines(stmt);
+}
+
+public int sloc(list[Statement] stmts) {
+	return ( 0 | it + countLines(stmt) | stmt <- stmts);
 }
 
 public int sloc(Declaration decl) {
@@ -41,3 +38,8 @@ public int countLines(value body) {
 	return size(methodLines);
 }
 
+public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
+
+private int linesOfCode(str text) {
+	return size(split("\n", cleanupFile(text)));
+}

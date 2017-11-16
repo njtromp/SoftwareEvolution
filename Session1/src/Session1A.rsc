@@ -12,10 +12,11 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import analysis::graphs::Graph;
-import ControlFlowGraph;
 import SLOC;
-import CyclomaticComplexity;
 import Metrics;
+import FileUtil;
+import ControlFlowGraph;
+import CyclomaticComplexity;
 import Visualize;
 
 private bool isATest(str path, set[str] testDirs) {
@@ -29,88 +30,76 @@ public void testing() {
 	
 	println("Creating ASTs");
 
-	//ast = createAstsFromEclipseProject(|project://RascalTest|, true);
-	//testDirs = {"/src/rascal/test/"};
+	//projectUnderTest = |project://Session1|;
+	//testFolders = {"/src/rascal/test/"};
 
-	//ast = createAstFromFile(|project://SmallSql/src/smallsql/database/ExpressionArithmetic.java|, true);
-	//testDirs = {"/src/smallsql/junit/"};
+	projectUnderTest = |project://SmallSql|;
+	testFolders = {"/src/smallsql/junit/"};
 
-	ast = createAstsFromEclipseProject(|project://SmallSql|, true);
-	testDirs = {"/src/smallsql/junit/"};
+	//projectUnderTest = |project://HsqlDB|;
+	//testFolders = {"/src/org/hsqldb/test/"};
 
-	//ast = createAstsFromEclipseProject(|project://HsqlDB|, true);
-	//testDirs = {"/src/org/hsqldb/test/"};
+	ast = createAstsFromEclipseProject(projectUnderTest, true);
 	println("ASTs created");
 
 	print("Analysing");
-	
+
 	list[MethodMetrics] metrics = [];
-	bool isTest = false;
-	packageName = "";
 	className = "";
-	visit (ast) {
-		case \package(name) : packageName = name;
-		case \package(_, name) : packageName = name;
-		case c:class(name, _, _, _) : {
-			className = name;
-			println("[<packageName>/<className>]");
-			isTest = isATest(c.src.path, testDirs);
+	isTest = false;
+	top-down visit (ast) {
+		case cl:class(_, _, _, _) : {
+			className = cl.decl.path;
 		}
-		case m:method(_, name, _, _, stmt) : {
+		case ctor:constructor(name, _, _, stmt) : {
+			msloc = sloc(ctor);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
-			//if (name == "ifTest")
-				//render(createVisualisation(makeGraph(stmt)));
-			
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+			//println("[<className>/<className>()] [<msloc>]");
 		}
-		case c:constructor(name, _, _, stmt) : {
+		case init:initializer(stmt) : {
+			msloc = sloc(init);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+			//println("[<className>/{}] [<msloc>]");
 		}
-		case i:initializer(stmt) : {
+		case mtd:method(_, name, _, _, stmt) : {
+			msloc = sloc(mtd);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += MethodMetrics(isTest, sloc(stmt), ccfg, ccwi);
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+			//println("[<className>/<name>()] [<msloc>]");
 		}
 	}
 	print(".");
-	totalSLOC = sloc(ast);
-	print(".");
 
-	// Volume rating
-	totalMethodSLOC = ( 0 | it + m.sloc | m <- metrics);
+	// Volume 
+	totalSLOC = sloc(findAllFiles(projectUnderTest, "java"));
 	print(".");
 	
 	// Unit size rating
-	unitSizes = computeUnitSize(totalMethodSLOC, metrics);
+	unitSizes = computeUnitSize(totalSLOC, metrics);
 	print(".");
 	
 	// Complexity rating
 	int cfgCC(MethodMetrics m) = m.ccfg;
-	cfgComplexity = computeComplexity(totalMethodSLOC, metrics, cfgCC);
+	cfgComplexity = computeComplexity(totalSLOC, metrics, cfgCC);
 	print(".");
 	int cwiCC(MethodMetrics m) = m.ccwi;
-	cwiComplexity = computeComplexity(totalMethodSLOC, metrics, cwiCC);
+	cwiComplexity = computeComplexity(totalSLOC, metrics, cwiCC);
 	print(".");
 
 	println("\nAnalysis done.\n");
 	
 	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
 	
-	//printReport();
-	
-	println("Done");
-}
-
-private void printReport() {
 	// Reporting
 	println("==================================================");
 	println("Nico Tromp & Rob Kunst.");
 	println("==================================================");
-	printVolumeRating("M", totalMethodSLOC);	
-	printVolumeRating("T", totalMethodSLOC);	
+	printVolumeRating(totalSLOC);	
 
 	printUnitSizeRating(unitSizes);	
 		
@@ -118,7 +107,7 @@ private void printReport() {
 	printComplexityRating("CWI", cwiComplexity);	
 
 	println("==================================================\n");
-	println("Volume profile <totalMethodSLOC>/<totalSLOC> (methods/total) lines of code");
+	println("Volume profile <totalSLOC> lines of code");
 	println();
 	println("Unit size profile(s)");
 	println();
@@ -134,4 +123,6 @@ private void printReport() {
 	println("Complexity profile (CWI)");
 	printComplexityProfile(cwiComplexity);
 	println();
+	
+	println("Done");
 }
