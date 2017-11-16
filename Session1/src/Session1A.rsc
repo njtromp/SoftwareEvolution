@@ -27,15 +27,6 @@ private bool isATest(str path, set[str] testDirs) {
 	return false;
 }
 
-public void bla() {
-	for(f <- findAllFiles(|project://SmallSql|, "java")) {
-		s = size(split("\n", cleanupFile(readFile(f))));
-		println("[<f>] == [<s>]");
-	}
-	[<f, size(split("\n", cleanupFile(readFile(f))))> | f <- findAllFiles(|project://SmallSql|, "java") ];
-}
-
-
 public void testing() {
 	
 	println("Creating ASTs");
