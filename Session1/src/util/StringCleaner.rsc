@@ -1,16 +1,11 @@
 module util::StringCleaner
 
+import IO;
 import String;
-
-public str removeLeadingSpaces(str text) {
-	return visit(text) {
-		case /^\s+/m => " "
-	}
-}
 
 public str removeEmptyLines(str text) {
 	cleanedText = visit(text) {
-		case /^\s*\n/ => ""
+		case /^[ \t]*\n/ => ""
 		case /(\s*\n)+/ => "\n"
 	};
 	// Dirty hack :-(
@@ -36,10 +31,6 @@ public str convertToNix(str text) {
 }
 
 public str cleanFile(str file) {
-	return removeLeadingSpaces(cleanupFile(file));
-}
-
-public str cleanupFile(str file) {
 	return removeEmptyLines(removeMultiLineComments(removeSingleLineComments(convertToNix(file))));
 }
 
@@ -56,22 +47,7 @@ test bool testRemoveEmptyLines9() = removeEmptyLines("public\n\n\nclass")      =
 test bool testRemoveEmptyLines10() = removeEmptyLines("public\n\n\nclass\n\n") == "public\nclass";
 test bool testRemoveEmptyLines11() = removeEmptyLines(toBeCleaned)             == cleaned;
 
-public str toBeCleaned = "package java;
-'
-'public class DummyClass {
-'
-'        private void dummyMethod() {
-'
-'        }
-'
-'}
-";
-
-public str cleaned = "package java;
-'public class DummyClass {
-'        private void dummyMethod() {
-'        }
-'}";
+test bool testCleanFile() = cleanFile(toBeCleaned) == veryClean;
 
 // TODO add tests for multiline comments
 
@@ -89,4 +65,62 @@ test bool test_RNR_ConvertToNix() = convertToNix("_\r\n\r_") == "_\n\n\n_";
 test bool test_NR_ConvertToNix()  = convertToNix("_\n\r_")   == "_\n\n_";
 test bool test_NRN_ConvertToNix() = convertToNix("_\n\r\n_") == "_\n\n\n_";
 
-test bool testRemoveLeadingSpaces() = removeLeadingSpaces(" a\n  b") == " a\n b";
+public str toBeCleaned = "package java;
+'
+'public class DummyClass {
+'
+'        private void dummyMethod() {
+'
+'            if (true) {
+'                int a = 1;
+'            } else {
+'                int a = -1;
+'
+'            }
+'
+'        }
+'
+'}
+";
+
+public str cleaned = "package java;
+'public class DummyClass {
+'        private void dummyMethod() {
+'            if (true) {
+'                int a = 1;
+'            } else {
+'                int a = -1;
+'            }
+'        }
+'}";
+
+public str veryClean = "package java;
+'public class DummyClass {
+'private void dummyMethod() {
+'if (true) {
+'int a = 1;
+'} else {
+'int a = -1;
+'}
+'}
+'}";
+
+public str cleanDuplicate = "package java;
+'public class Duplicates {
+'public void method1() {
+'int a = 1;
+'int b = 2;
+'int c = 3;
+'int d = 4;
+'}
+'public void method2() {
+'int a = 1;
+'int b = 2;
+'int c = 3;
+'}
+'public void method3() {
+'int b = 2;
+'int c = 3;
+'int d = 4;
+'}
+'}"; 
