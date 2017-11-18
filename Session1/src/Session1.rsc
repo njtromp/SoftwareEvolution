@@ -30,7 +30,8 @@ public void runMetrics() {
 }
 
 public void findDuplicates() {
-	parseFiles(|project://SmallSql|);
+	//parseFiles(|project://SmallSql|);
+	parseFiles(|project://Session1|);
 }
 
 public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
