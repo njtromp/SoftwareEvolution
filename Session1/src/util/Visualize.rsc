@@ -1,4 +1,4 @@
-module Visualize
+module util::Visualize
 
 import Set;
 import List;

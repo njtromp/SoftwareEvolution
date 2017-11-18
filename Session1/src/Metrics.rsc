@@ -3,14 +3,28 @@ module Metrics
 import IO;
 import List;
 
-public data MethodMetrics = MethodMetrics(int sloc, int ccfg, int ccwi);
+public alias SLOC = int;
+public alias CC = int;
+public alias ClassName = str;
+public alias MethodName = str;
+public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi);
+public data Method = Methond(MethodName name, SLOC sloc, CC ccfg, CC ccwi);
+public data Class = Class(ClassName name, bool isTest, SLOC sloc, list[Method] methods);
+public data Project = Project(list[Class] classes);
 public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
+
+/*
+ * We don't count annotations when determining the SLOC
+ * We don't count imports
+ */
+
+public int sloc(MethodMetrics metrics) = metrics.sloc;
 
 public int sloc(list[MethodMetrics] metrics) {
 	return ( 0 | it + m.sloc | m <-metrics);
 }
 
-public void printVolumeRating(str name, int sloc) {
+public void printVolumeRating(int sloc) {
 	rating = "--";
 	if (sloc < 66000) {
 		rating = "++";
@@ -21,7 +35,7 @@ public void printVolumeRating(str name, int sloc) {
 	} else if (sloc < 1310000) {
 		rating = " -";
 	}
-	println("Volume (<name>):       <rating>");
+	println("Volume:           <rating>");
 }
 
 public MetricsDistribution computeUnitSize(int totalSLOC, list[MethodMetrics] metrics) {
