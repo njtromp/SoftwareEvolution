@@ -5,6 +5,12 @@ import IO;
 
 // Just for testing :-).
 
+public void progressBar() {
+	print("[.    ]");
+	print("\b\b\b\b\b.   ]");
+	println();
+}
+
 public str typeOf(value v) {
 	switch(v) {
 		case str s : return "It\'s a String";
