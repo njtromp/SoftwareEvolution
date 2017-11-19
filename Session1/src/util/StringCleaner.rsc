@@ -74,6 +74,8 @@ public str removeMultiLineComments(str text) {
 			case <false, _, -1, -1,-1> :{
 				if (charAt(text, firstQuote - 1) == 92) { // 92 is the ASCII value for '\'
 					return substring(text, 0, firstQuote + 1) + removeBastard(substring(text, firstQuote + 1));
+				} else if (charAt(text, firstQuote - 1) == 39 && charAt(text, firstQuote + 1) == 39) {
+					return substring(text, 0, firstQuote + 2) + removeBastard(substring(text, firstQuote + 2));
 				}
 			}
 
