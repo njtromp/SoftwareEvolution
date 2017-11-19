@@ -14,7 +14,7 @@ import CyclomaticComplexity;
 import FileIndexer;
 
 import util::StringCleaner;
-import util::Metrics;
+import Metrics;
 
 /**
  * Some very rudimentary and ugly metrics determination.
@@ -30,8 +30,8 @@ public void runMetrics() {
 }
 
 public void findDuplicates() {
-	//parseFiles(|project://SmallSql|);
-	parseFiles(|project://Session1|);
+	parseFiles(|project://SmallSql|);
+	//parseFiles(|project://Session1|);
 }
 
 public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
