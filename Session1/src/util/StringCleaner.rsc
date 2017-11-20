@@ -104,8 +104,8 @@ public str removeMultiLineComments(str text) {
 					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				} else if (firstQuote < openTag && openTag < secondQuote && secondQuote < closeTag) {
 					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
-				} else if (openTag < firstQuote && openTag < secondQuote && firstQuote < closeTag && secondQuote < closeTag) {
-					return substring(text, 0,closeTag + 2) + removeMultiLine(substring(text, closeTag + 2));
+				} else if (openTag < firstQuote && openTag < secondQuote && secondQuote < closeTag && secondQuote < closeTag) {
+					return substring(text, 0, openTag) + removeMultiLine(substring(text, closeTag + 2));
 				} else if (secondQuote < openTag) {
 					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				}
@@ -165,7 +165,7 @@ public str cleanFile(str file) {
 }
 
 test bool testCleanFile()                  = cleanFile("    	return \"\\\"\";") == "    	return \"\\\"\";";
-test bool testCleanFileQuotesBetweenTags() = cleanFile(quotesBetweenTags) == quotesBetweenTags;
+test bool testCleanFileQuotesBetweenTags() = cleanFile(quotesBetweenTags) == "";
 test bool testCleanFileTagsAfterQuotes()   = cleanFile(tagsAfterQuotes) == cleanedTagsAfterQuotes;
 
 // Ugly test names ;-)
@@ -181,20 +181,22 @@ test bool testRemoveEmptyLines9()  = removeEmptyLines("public\n\n\nclass")      
 test bool testRemoveEmptyLines10() = removeEmptyLines("public\n\n\nclass\n\n")  == "public\nclass";
 test bool testRemoveEmptyLines11() = removeEmptyLines(toBeCleaned)              == cleaned;
 
-test bool testRemoveMultiLineCommentsSimple()      = removeMultiLineComments(simpleMultiLineComment) == "";
-test bool testRemoveMultiLineComments()            = removeMultiLineComments(multiLineComment) == cleanMultiLineComment;
-test bool testRemoveMultiLineCommentsWithString()  = removeMultiLineComments(multiLineCommentWithString) == cleanMultiLineCommentWithString;
-test bool testRemoveEmbeddedMultiLineComments()    = removeMultiLineComments(multiLineEmbedded)             == cleanMultiLineEmbedded;
-test bool testRemoveNastyMultiLineComments()       = removeMultiLineComments(nastyEmbeddedMultiLineComment) == nastyEmbeddedMultiLineComment;
-test bool testSizeTestTokenizerCleaning()          = size(split("\n", cleanFile(readFile(|project://SmallSql/src/smallsql/junit/TestTokenizer.java|)))) == 105;
+test bool testRemoveMultiLineCommentsSimple()          = removeMultiLineComments(simpleMultiLineComment) == "";
+test bool testRemoveMultiLineComments()                = removeMultiLineComments(multiLineComment) == cleanMultiLineComment;
+test bool testRemoveMultiLineCommentsWithString()      = removeMultiLineComments(multiLineCommentWithString) == cleanMultiLineCommentWithString;
+test bool testRemoveMultiLineCommentsEmbedded()        = removeMultiLineComments(multiLineEmbedded)             == cleanMultiLineEmbedded;
+test bool testRemoveNastyMultiLineComments()           = removeMultiLineComments(nastyEmbeddedMultiLineComment) == nastyEmbeddedMultiLineComment;
 test bool testRemoveMultiLineWithEmbedEndTagInString() = removeMultiLineComments(nestedEndTagInString) == "";
-test bool testRemoveMultuLineCommentsEmbeddedTags() = removeMultiLineComments("if (line.equals(\"/*\") || line.equals(\"*/\")) {") == "if (line.equals(\"/*\") || line.equals(\"*/\")) {";
+test bool testRemoveMultiLineCommentsEmbeddedTags()    = removeMultiLineComments("if (line.equals(\"/*\") || line.equals(\"*/\")) {") == "if (line.equals(\"/*\") || line.equals(\"*/\")) {";
+test bool testRemoveMuliLineCommentsNestedString()     = removeMultiLineComments(quotesBetweenTags) == "";
+
+test bool testSizeTestTokenizerCleaning()          = size(split("\n", cleanFile(readFile(|project://SmallSql/src/smallsql/junit/TestTokenizer.java|)))) == 105;
 
 test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
 test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "class";
 test bool testRemoveSingleLineComments4() = removeSingleLineComments("public// Junk\nclass") == "public\nclass";
-test bool testRemoveSingleLineCommentWithURL() = removeSingleLineComments("String HTTPS = \"https://\";") == "String HTTPS = \"https://\";";
+test bool testRemoveSingleLineCommentWithURL()     = removeSingleLineComments("String HTTPS = \"https://\";") == "String HTTPS = \"https://\";";
 test bool testRemoveSingleLineCommentAfterString() = removeSingleLineComments("        addKeyWord( \"EXEC\",     EXECUTE); // alias for EXECUTE;") == "        addKeyWord( \"EXEC\",     EXECUTE); ";
 
 test bool testRNConvertToNix()    = convertToNix("\r\n")     == "\n\n";
@@ -207,8 +209,8 @@ test bool test_NR_ConvertToNix()  = convertToNix("_\n\r_")   == "_\n\n_";
 test bool test_NRN_ConvertToNix() = convertToNix("_\n\r\n_") == "_\n\n\n_";
 
 public str quotesBetweenTags = "    /** if the current array \"page\" is shared. This make sence for read only access but not if it will be write. */";
-public str tagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){/* ignore it */}";
-public str cleanedTagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){}";
+str tagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){/* ignore it */}";
+str cleanedTagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){}";
 
 str simpleMultiLineComment = "/**
 ' * this will
