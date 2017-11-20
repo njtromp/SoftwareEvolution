@@ -32,7 +32,7 @@ public str removeMultiLineComments(str text) {
 	 * are determined. Depending on the exact values and combinations of these markers
 	 * the line or parts of it are removed and processed recursively. 
 	 */
-	str removeBastard(str text) {
+	str removeMultiLine(str text) {
 		if (isEmpty(trim(text))) return text;
 		
 		int firstQuote = findFirst(text, "\"");
@@ -55,16 +55,16 @@ public str removeMultiLineComments(str text) {
 			}
 			case <true, -1, -1, _, -1> : return "";
 
-			case <false, -1, -1, -1, _> : return substring(text, 0, closeTag + 2) + removeBastard(substring(text, closeTag + 2));
+			case <false, -1, -1, -1, _> : return substring(text, 0, closeTag + 2) + removeMultiLine(substring(text, closeTag + 2));
 			case <true, -1, -1, -1, _> : {
 				insideComment = false;
-				return removeBastard(substring(text, closeTag+2));
+				return removeMultiLine(substring(text, closeTag+2));
 			}
 
 			case <true, _, _, -1, -1> : return "";
 			
 			case <false, -1, -1, _, _> : {
-				return substring(text, 0, openTag) + removeBastard(substring(text, closeTag + 2));
+				return substring(text, 0, openTag) + removeMultiLine(substring(text, closeTag + 2));
 			}
 
 			case <false, 0, -1, -1,-1> : {
@@ -73,42 +73,42 @@ public str removeMultiLineComments(str text) {
 
 			case <false, _, -1, -1,-1> :{
 				if (charAt(text, firstQuote - 1) == 92) { // 92 is the ASCII value for '\'
-					return substring(text, 0, firstQuote + 1) + removeBastard(substring(text, firstQuote + 1));
+					return substring(text, 0, firstQuote + 1) + removeMultiLine(substring(text, firstQuote + 1));
 				} else if (charAt(text, firstQuote - 1) == 39 && charAt(text, firstQuote + 1) == 39) {
-					return substring(text, 0, firstQuote + 2) + removeBastard(substring(text, firstQuote + 2));
+					return substring(text, 0, firstQuote + 2) + removeMultiLine(substring(text, firstQuote + 2));
 				}
 			}
 
 			case <false, _, _, -1, -1> : {
-				return substring(text, 0, secondQuote + 1) + removeBastard(substring(text, secondQuote + 1));
+				return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 			}
 			case <false, _, _, -1, _> : {
 				if (firstQuote < closeTag && closeTag < secondQuote) {
-					return substring(text, 0, secondQuote + 1) + removeBastard(substring(text, secondQuote + 1));
+					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				}					
 			}
 			case <false, _, _, _, -1> : {
 				if (firstQuote < openTag && openTag < secondQuote) {
-					return substring(text, 0, secondQuote + 1) + removeBastard(substring(text, secondQuote + 1));
+					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				}					
 			}
 			case <false, _, _, _, _> : {
 				if (firstQuote < openTag && openTag < secondQuote && firstQuote < closeTag && closeTag < secondQuote) {
-					return substring(text, 0, secondQuote + 1) + removeBastard(substring(text, secondQuote + 1));
+					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				} else if (openTag < firstQuote && openTag < secondQuote && firstQuote < closeTag && secondQuote < closeTag) {
-					return substring(text, 0,closeTag + 2) + removeBastard(substring(text, closeTag + 2));
+					return substring(text, 0,closeTag + 2) + removeMultiLine(substring(text, closeTag + 2));
 				} else if (secondQuote < openTag) {
-					return substring(text, 0, secondQuote + 1) + removeBastard(substring(text, secondQuote + 1));
+					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				}
 			}
 		};
-		println("Please check \<<insideComment>, <firstQuote>, <secondQuote>, <openTag>, <closeTag>\>\n[<text>]");
+		println("\nPlease check \<<insideComment>, <firstQuote>, <secondQuote>, <openTag>, <closeTag>\>\n[<text>]");
 		return text;
 	}
 	
 	list[str] removeEmptyLines(list[str] lines) = [ line | line <- lines, size(trim(line)) > 0];
 	
-	return intercalate("\n", removeEmptyLines([removeBastard(s) | s <- split("\n", text)]));
+	return intercalate("\n", removeEmptyLines([removeMultiLine(s) | s <- split("\n", text)]));
 }
 
 public str removeSingleLineComments(str text) {
@@ -153,6 +153,7 @@ test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")      
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
 test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "\nclass";
 test bool testRemoveSingleLineComments4() = removeSingleLineComments("public// Junk\nclass") == "public\nclass";
+test bool testRemoveSingleLineCommentWithURL() = removeSingleLineComments("String S_HTTPS = \"https://\";") == "String S_HTTPS = \"https://\";";
 
 test bool testRNConvertToNix()    = convertToNix("\r\n")     == "\n\n";
 test bool testRNRConvertToNix()   = convertToNix("\r\n\r")   == "\n\n\n";
