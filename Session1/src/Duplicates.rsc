@@ -26,25 +26,21 @@ public void main() {
 	map[list[str], set[int]] duplicateBlocks = ();
 	set[int] emptySet = {};
 	for (f <- files) {
-		str context = removeMultiLineComments(readFile(f));
-		//println(context);
+		str context = removeMultiLineComments(removeSingleLineComments(convertToNix(readFile(f))));
 		print(".");
 		for (line <- split("\n", context)) {
 			line = trim(line);
-			//if (!startsWith(line, "import ") && !startsWith(line, "package ") && !isEmpty(line)) {
-			//if (!startsWith(line, "import ") && !startsWith(line, "package ")) {
-			if (!isEmpty(line) && !startsWith(line, "//")) {
-				lineNr += 1;
-				codeBlock += line;
-				linesInBlock += lineNr;
-				if (lineNr > MIN_DUP_SIZE) {
-					codeBlock = tail(codeBlock);
-					linesInBlock = tail(linesInBlock);
-					if (	duplicateBlocks[codeBlock]?) {
-						duplicateBlocks[codeBlock] += toSet(linesInBlock);
-					} else {
-						duplicateBlocks += (codeBlock:emptySet);
-					}
+			if (isEmpty(line)) print("-");
+			lineNr += 1;
+			codeBlock += line;
+			linesInBlock += lineNr;
+			if (lineNr > MIN_DUP_SIZE) {
+				codeBlock = tail(codeBlock);
+				linesInBlock = tail(linesInBlock);
+				if (	duplicateBlocks[codeBlock]?) {
+					duplicateBlocks[codeBlock] += toSet(linesInBlock);
+				} else {
+					duplicateBlocks += (codeBlock:emptySet);
 				}
 			}
 		}

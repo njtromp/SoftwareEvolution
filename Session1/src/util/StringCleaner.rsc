@@ -4,7 +4,8 @@ import IO;
 import List;
 import String;
 
-public str removeEmptyLines(str text) {
+// Deprecated not in use anymore
+private str removeEmptyLines(str text) {
 	cleanedText = visit(text) {
 		case /^[ \t]*\n/ => ""
 		case /(\s*\n)+/ => "\n"
@@ -65,7 +66,6 @@ public str removeMultiLineComments(str text) {
 			
 			case <true, _, _, _, -1> : {
 				if (firstQuote < openTag && openTag < secondQuote) {
-					//return substring(text,0 , secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 					return removeMultiLine(substring(text, secondQuote + 1));
 				}
 			}
@@ -101,6 +101,8 @@ public str removeMultiLineComments(str text) {
 			}
 			case <false, _, _, _, _> : {
 				if (firstQuote < openTag && openTag < secondQuote && firstQuote < closeTag && closeTag < secondQuote) {
+					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
+				} else if (firstQuote < openTag && openTag < secondQuote && secondQuote < closeTag) {
 					return substring(text, 0, secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
 				} else if (openTag < firstQuote && openTag < secondQuote && firstQuote < closeTag && secondQuote < closeTag) {
 					return substring(text, 0,closeTag + 2) + removeMultiLine(substring(text, closeTag + 2));
@@ -179,13 +181,14 @@ test bool testRemoveEmptyLines9()  = removeEmptyLines("public\n\n\nclass")      
 test bool testRemoveEmptyLines10() = removeEmptyLines("public\n\n\nclass\n\n")  == "public\nclass";
 test bool testRemoveEmptyLines11() = removeEmptyLines(toBeCleaned)              == cleaned;
 
-test bool testRemoveSimpleMultiLineComments()      = removeMultiLineComments(simpleMultiLineComment) == "";
+test bool testRemoveMultiLineCommentsSimple()      = removeMultiLineComments(simpleMultiLineComment) == "";
 test bool testRemoveMultiLineComments()            = removeMultiLineComments(multiLineComment) == cleanMultiLineComment;
 test bool testRemoveMultiLineCommentsWithString()  = removeMultiLineComments(multiLineCommentWithString) == cleanMultiLineCommentWithString;
 test bool testRemoveEmbeddedMultiLineComments()    = removeMultiLineComments(multiLineEmbedded)             == cleanMultiLineEmbedded;
 test bool testRemoveNastyMultiLineComments()       = removeMultiLineComments(nastyEmbeddedMultiLineComment) == nastyEmbeddedMultiLineComment;
 test bool testSizeTestTokenizerCleaning()          = size(split("\n", cleanFile(readFile(|project://SmallSql/src/smallsql/junit/TestTokenizer.java|)))) == 105;
 test bool testRemoveMultiLineWithEmbedEndTagInString() = removeMultiLineComments(nestedEndTagInString) == "";
+test bool testRemoveMultuLineCommentsEmbeddedTags() = removeMultiLineComments("if (line.equals(\"/*\") || line.equals(\"*/\")) {") == "if (line.equals(\"/*\") || line.equals(\"*/\")) {";
 
 test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";

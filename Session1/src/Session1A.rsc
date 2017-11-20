@@ -44,7 +44,7 @@ private int countAsserts(Statement stmt) {
 	return asserts;
 }
 
-public void testing() {
+public void main() {
 	
 	println("Creating ASTs");
 
@@ -62,6 +62,11 @@ public void testing() {
 
 	print("Analysing");
 
+	// Volume 
+	totalSLOC = sloc(find(projectUnderTest, "java"));
+	//totalSLOC = 10000;
+	print(".");
+	
 	list[MethodMetrics] metrics = [];
 	className = "";
 	isTest = false;
@@ -98,11 +103,6 @@ public void testing() {
 	}
 	print(".");
 
-	// Volume 
-	//totalSLOC = sloc(find(projectUnderTest, "java"));
-	totalSLOC = 10000;
-	print(".");
-	
 	// Unit size rating
 	unitSizes = computeUnitSize(totalSLOC, metrics);
 	print(".");
