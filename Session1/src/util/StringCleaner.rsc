@@ -63,6 +63,13 @@ public str removeMultiLineComments(str text) {
 
 			case <true, _, _, -1, -1> : return "";
 			
+			case <true, _, _, _, -1> : {
+				if (firstQuote < openTag && openTag < secondQuote) {
+					//return substring(text,0 , secondQuote + 1) + removeMultiLine(substring(text, secondQuote + 1));
+					return removeMultiLine(substring(text, secondQuote + 1));
+				}
+			}
+
 			case <false, -1, -1, _, _> : {
 				return substring(text, 0, openTag) + removeMultiLine(substring(text, closeTag + 2));
 			}
@@ -74,7 +81,7 @@ public str removeMultiLineComments(str text) {
 			case <false, _, -1, -1,-1> :{
 				if (charAt(text, firstQuote - 1) == 92) { // 92 is the ASCII value for '\'
 					return substring(text, 0, firstQuote + 1) + removeMultiLine(substring(text, firstQuote + 1));
-				} else if (charAt(text, firstQuote - 1) == 39 && charAt(text, firstQuote + 1) == 39) {
+				} else if (charAt(text, firstQuote - 1) == 39 && charAt(text, firstQuote + 1) == 39) { // 39 is the ASCII value for the single quote '
 					return substring(text, 0, firstQuote + 2) + removeMultiLine(substring(text, firstQuote + 2));
 				}
 			}
@@ -112,9 +119,39 @@ public str removeMultiLineComments(str text) {
 }
 
 public str removeSingleLineComments(str text) {
-	return visit(text) {
-		case /\/\/.*/ => ""
-	};
+
+	str removeSingleLine(str text) {
+	 	marker = findFirst(text, "//");
+		if (marker == -1) {
+			return text;
+		} else {
+			if (isEmpty(trim(substring(text, 0, marker)))) {
+				return "";
+			} else {
+				firstQuote = findFirst(text, "\"");
+				if (firstQuote == -1) {
+					return substring(text, 0, marker);
+				} else if (firstQuote > marker) {
+					return substring(text, 0, marker);
+				} else {
+					secondQuote = findFirst(substring(text, firstQuote + 1), "\"");
+					if (secondQuote >= 0) {
+					 	secondQuote = firstQuote + 1 + secondQuote;
+					}
+					if (firstQuote < marker && marker < secondQuote) {
+						return substring(text, 0, secondQuote + 1) + removeSingleLine(substring(text, secondQuote + 1));
+					} else if (secondQuote < marker) {
+						return substring(text, 0, marker);
+					}
+					println("\nPlease check \<<marker>, <firstQuote>, <secondQuote>\>\n[<text>]");
+				}
+			}
+		}
+	}
+
+	list[str] removeEmptyLines(list[str] lines) = [ line | line <- lines, size(trim(line)) > 0];
+	
+	return intercalate("\n", removeEmptyLines([removeSingleLine(s) | s <- split("\n", text)]));
 }
 
 public str convertToNix(str text) {
@@ -148,12 +185,14 @@ test bool testRemoveMultiLineCommentsWithString()  = removeMultiLineComments(mul
 test bool testRemoveEmbeddedMultiLineComments()    = removeMultiLineComments(multiLineEmbedded)             == cleanMultiLineEmbedded;
 test bool testRemoveNastyMultiLineComments()       = removeMultiLineComments(nastyEmbeddedMultiLineComment) == nastyEmbeddedMultiLineComment;
 test bool testSizeTestTokenizerCleaning()          = size(split("\n", cleanFile(readFile(|project://SmallSql/src/smallsql/junit/TestTokenizer.java|)))) == 105;
+test bool testRemoveMultiLineWithEmbedEndTagInString() = removeMultiLineComments(nestedEndTagInString) == "";
 
 test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
-test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "\nclass";
+test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "class";
 test bool testRemoveSingleLineComments4() = removeSingleLineComments("public// Junk\nclass") == "public\nclass";
-test bool testRemoveSingleLineCommentWithURL() = removeSingleLineComments("String S_HTTPS = \"https://\";") == "String S_HTTPS = \"https://\";";
+test bool testRemoveSingleLineCommentWithURL() = removeSingleLineComments("String HTTPS = \"https://\";") == "String HTTPS = \"https://\";";
+test bool testRemoveSingleLineCommentAfterString() = removeSingleLineComments("        addKeyWord( \"EXEC\",     EXECUTE); // alias for EXECUTE;") == "        addKeyWord( \"EXEC\",     EXECUTE); ";
 
 test bool testRNConvertToNix()    = convertToNix("\r\n")     == "\n\n";
 test bool testRNRConvertToNix()   = convertToNix("\r\n\r")   == "\n\n\n";
@@ -258,3 +297,7 @@ str cleanDuplicate = "package java;
 'int d = 4;
 '}
 '}"; 
+
+public str nestedEndTagInString = "        /**
+'         * we read the lines from the start of one section of the script \"/*\"
+'         */";
