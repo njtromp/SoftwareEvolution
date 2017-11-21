@@ -20,21 +20,21 @@ public void main() {
 	//set[loc] files = find(|project://HsqlDB|, "java");
 	
 	int lineNr = 0;
-	list[str] codeBlock = [];
-	list[int] linesInBlock = [];
-	map[list[str], set[int]] duplicateBlocks = ();
 	set[int] emptySet = {};
+	map[list[str], set[int]] duplicateBlocks = ();
 	for (f <- files) {
+		// Start fresh
+		list[str] codeBlock = [];
+		list[int] linesInBlock = [];
 		str context = removeMultiLineComments(removeSingleLineComments(convertToNix(readFile(f))));
-		print("");
 		lines = split("\n", context);
+		print(".");
 		for (line <- lines) {
 			line = trim(line);
-			if (isEmpty(line)) print("-");
 			lineNr += 1;
 			codeBlock += line;
 			linesInBlock += lineNr;
-			if (lineNr > MIN_DUP_SIZE) {
+			if (size(codeBlock) == MIN_DUP_SIZE) {
 				codeBlock = tail(codeBlock);
 				linesInBlock = tail(linesInBlock);
 				if (	duplicateBlocks[codeBlock]?) {
