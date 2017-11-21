@@ -10,13 +10,12 @@ import util::StringCleaner;
 
 private int MIN_DUP_SIZE = 6;
 
-private str cleanFileContent(str text) {
-	return removeMultiLineComments(removeSingleLineComments(convertToNix(text)));
-}
-
 public void main() {
 	//set[loc] files = {|project://Session1/src/java/Duplicates.java|};
+	//set[loc] files = {|project://Session1/src/java/NiftyDuplicates.java|};
 	//set[loc] files = {|project://SmallSql/src/smallsql/junit/TestTokenizer.java|};
+	//set[loc] files = {|project://SmallSql//src/smallsql/junit/AllTests.java|};
+	//set[loc] files = {|project://SmallSql//src/smallsql/database/StoreImpl.java|};
 	set[loc] files = find(|project://SmallSql|, "java");
 	//set[loc] files = find(|project://HsqlDB|, "java");
 	
@@ -27,8 +26,9 @@ public void main() {
 	set[int] emptySet = {};
 	for (f <- files) {
 		str context = removeMultiLineComments(removeSingleLineComments(convertToNix(readFile(f))));
-		print(".");
-		for (line <- split("\n", context)) {
+		print("");
+		lines = split("\n", context);
+		for (line <- lines) {
 			line = trim(line);
 			if (isEmpty(line)) print("-");
 			lineNr += 1;
@@ -45,12 +45,10 @@ public void main() {
 			}
 		}
 	}
-	//iprintln(duplicateBlocks);
 	set[int] dupLines  = {};
 	for (key <- domain(duplicateBlocks)) {
 		dupLines += duplicateBlocks[key];
 	}
-	//println(sort(toList(dupLines)));
 	println("\nNumber of duplicate lines [<size(dupLines)>]");
 	println("SLOC [<lineNr>]");
 }
