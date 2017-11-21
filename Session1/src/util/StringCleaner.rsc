@@ -21,6 +21,7 @@ public str removeEmptyLines(str text) {
  * visit (text) {
  *	   case /<string:\".*[^\n]\">/ => "<string>"
  *	   case /\/\*([^\*]|(\*+[^\*\/]))*\*+\// => ""
+ *	   case /\/\*[\s\S]*?\*\//  => ""
  * }
  * And all kind of variantions. 
  */

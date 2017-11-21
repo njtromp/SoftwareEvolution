@@ -18,6 +18,8 @@ public void main() {
 	//set[loc] files = {|project://SmallSql//src/smallsql/database/StoreImpl.java|};
 	set[loc] files = find(|project://SmallSql|, "java");
 	//set[loc] files = find(|project://HsqlDB|, "java");
+	//set[loc] files = find(|project://HsqlDB/src/org/hsqldb/StatementDML.java|, "java");
+	//set[loc] files = find(|project://HsqlDB/src/org/hsqldb/TransactionManagerMV2PL.java|, "java");
 	
 	int lineNr = 0;
 	set[int] emptySet = {};
@@ -26,29 +28,45 @@ public void main() {
 		// Start fresh
 		list[str] codeBlock = [];
 		list[int] linesInBlock = [];
-		str context = removeMultiLineComments(removeSingleLineComments(convertToNix(readFile(f))));
-		lines = split("\n", context);
+		// This order of cleaning takes care of some tricky nested comments styles
+		str content = removeSingleLineComments(removeMultiLineComments(convertToNix(readFile(f))));
+		lines = split("\n", content);
 		print(".");
 		for (line <- lines) {
 			line = trim(line);
 			lineNr += 1;
-			codeBlock += line;
-			linesInBlock += lineNr;
-			if (size(codeBlock) == MIN_DUP_SIZE) {
-				codeBlock = tail(codeBlock);
-				linesInBlock = tail(linesInBlock);
-				if (	duplicateBlocks[codeBlock]?) {
-					duplicateBlocks[codeBlock] += toSet(linesInBlock);
-				} else {
-					duplicateBlocks += (codeBlock:emptySet);
+			if (line != "{" && line != "}") {
+				codeBlock += line;
+				linesInBlock += lineNr;
+				if (size(codeBlock) == MIN_DUP_SIZE) {
+					codeBlock = tail(codeBlock);
+					linesInBlock = tail(linesInBlock);
+					if (	duplicateBlocks[codeBlock]?) {
+						duplicateBlocks[codeBlock] += toSet(linesInBlock);
+					} else {
+						duplicateBlocks += (codeBlock:emptySet);
+					}
 				}
 			}
 		}
 	}
-	set[int] dupLines  = {};
-	for (key <- domain(duplicateBlocks)) {
-		dupLines += duplicateBlocks[key];
-	}
-	println("\nNumber of duplicate lines [<size(dupLines)>]");
+	numberOfDupLines = size(union(range(duplicateBlocks)));
+	println("\nNumber of duplicate lines [<numberOfDupLines>]");
 	println("SLOC [<lineNr>]");
+	dupPercentage = 100 * numberOfDupLines / lineNr;
+	printDuplicationRating(dupPercentage);
+}
+
+public void printDuplicationRating(int dupPercentage) {
+	rating = "--";
+	if (dupPercentage <= 3) {
+		rating = "++";
+	} else if (dupPercentage <= 5) {
+		rating = " +";
+	} else if (dupPercentage <= 10) {
+		rating = " o";
+	} else if (dupPercentage <= 20) {
+		rating = " -";
+	}
+	println("Duplication:      <rating>");
 }

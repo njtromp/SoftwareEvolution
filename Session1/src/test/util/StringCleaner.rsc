@@ -55,21 +55,21 @@ public str quotesBetweenTags = "    /** if the current array \"page\" is shared.
 str tagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){/* ignore it */}";
 str cleanedTagsAfterQuotes = "            try{st.execute(\"drop procedure sp_\"+tableName);}catch(Exception e){}";
 
-str simpleMultiLineComment = "/**
+public str simpleMultiLineComment = "/**
 ' * this will
 ' * be gone
 ' */";
 
-str multiLineComment = " int a = 1;
+public str multiLineComment = " int a = 1;
 ' /**
 ' * this will
 ' * be gone
 ' */
 ' int b = 2;";
-str cleanMultiLineComment = " int a = 1;
+public str cleanMultiLineComment = " int a = 1;
 ' int b = 2;";
 
-str multiLineCommentWithString = " int a = 1;
+public str multiLineCommentWithString = " int a = 1;
 ' /**
 ' * this will
 ' */
@@ -78,17 +78,17 @@ str multiLineCommentWithString = " int a = 1;
 ' * be gone
 ' */
 ' int b = 2;";
-str cleanMultiLineCommentWithString = " int a = 1;
+public str cleanMultiLineCommentWithString = " int a = 1;
 ' String name = \"RegEx\";
 ' int b = 2;";
 
 
-str multiLineEmbedded = "		final String SQL_3 = 
+public str multiLineEmbedded = "		final String SQL_3 = 
 '           /* This must be removed*/
 '           /** This must also be removed*/
 '			\"SELECT 10/2 /* this should stay */ \";
 ";
-str cleanMultiLineEmbedded = "		final String SQL_3 = 
+public str cleanMultiLineEmbedded = "		final String SQL_3 = 
 '			\"SELECT 10/2 /* this should stay */ \";";
 
 public str nastyEmbeddedMultiLineComment = "		final String SQL_3 = 
@@ -96,7 +96,7 @@ public str nastyEmbeddedMultiLineComment = "		final String SQL_3 =
 '		failureTest(SQL_3, 
 '				\"Even with this nasty */ string.\";";
 
-str toBeCleaned = "
+public str toBeCleaned = "
 'package java;
 '
 'public class DummyClass {
@@ -115,7 +115,7 @@ str toBeCleaned = "
 '}
 ";
 
-str cleaned = "package java;
+public str cleaned = "package java;
 'public class DummyClass {
 '        private void dummyMethod() {
 '            if (true) {
@@ -126,7 +126,7 @@ str cleaned = "package java;
 '        }
 '}";
 
-str cleanDuplicate = "package java;
+public str cleanDuplicate = "package java;
 'public class Duplicates {
 'public void method1() {
 'int a = 1;
