@@ -40,6 +40,6 @@ public int countLines(value body) {
 
 public int sloc(set[loc] files) = sum([ linesOfCode(readFile(file)) | file <- files]);
 
-private int linesOfCode(str text) {
+public int linesOfCode(str text) {
 	return size(split("\n", cleanFile(text)));
 }
