@@ -28,22 +28,31 @@ public SlocDup determineDuplicates(set[loc] files) {
 		for (line <- lines) {
 			line = trim(line);
 			lineNr += 1;
-			if (line != "{" && line != "}") {
+			//if (line != "{" && line != "}") {
 				codeBlock += line;
 				linesInBlock += lineNr;
-				if (size(codeBlock) == MIN_DUP_SIZE) {
-					codeBlock = tail(codeBlock);
-					linesInBlock = tail(linesInBlock);
+				if (size(codeBlock) >= MIN_DUP_SIZE) {
 					if (	duplicateBlocks[codeBlock]?) {
 						duplicateBlocks[codeBlock] += toSet(linesInBlock);
 					} else {
-						duplicateBlocks += (codeBlock:emptySet);
+						//duplicateBlocks += (codeBlock:emptySet);
+						duplicateBlocks += (codeBlock:toSet(linesInBlock));
 					}
+					codeBlock = tail(codeBlock);
+					linesInBlock = tail(linesInBlock);
 				}
-			}
+			//}
 		}
 	}
-	numberOfDupLines = size(union(range(duplicateBlocks)));
+	//println(duplicateBlocks);
+	//numberOfDupLines = size(union(range(duplicateBlocks)));
+	set[int] dupLines  = {};
+	for (key <- domain(duplicateBlocks)) {
+		s = size(duplicateBlocks[key]);
+		dupLines += s > MIN_DUP_SIZE ? duplicateBlocks[key] : {};
+	}
+	numberOfDupLines = size(dupLines);
+
 	print("\b.");
 	return SlocDup(lineNr, numberOfDupLines);
 }
