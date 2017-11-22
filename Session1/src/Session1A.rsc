@@ -62,13 +62,13 @@ public void main() {
 			msloc = sloc(ctor);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
+			metrics += metric = MethodMetrics(ctor.src, isTest, msloc, ccfg, ccwi);
 		}
 		case init:initializer(stmt) : {
 			msloc = sloc(init);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
+			metrics += metric = MethodMetrics(init.src, isTest, msloc, ccfg, ccwi);
 		}
 		case mtd:method(_, name, _, _, stmt) : {
 			msloc = sloc(mtd);
@@ -78,10 +78,11 @@ public void main() {
 			if (isTest) {
 				asserts = countAsserts(stmt);
 			}
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, asserts);
+			metrics += metric = MethodMetrics(mtd.src, isTest, msloc, ccfg, ccwi, asserts);
 		}
 	}
 	print(".");
+	writeFile(|file:///Users/nico/Desktop/metrics.txt|, metrics);
 
 	// Unit size rating
 	unitSizes = computeUnitSize(totalSLOC, metrics);

@@ -16,7 +16,8 @@ public alias Rating = int;
 public alias ClassName = str;
 public alias MethodName = str;
 
-public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi, int asserts);
+public data MethodMetrics = MethodMetrics(loc locaton, bool isTest, SLOC sloc, int ccfg, int ccwi)
+							| MethodMetrics(loc locaton, bool isTest, SLOC sloc, int ccfg, int ccwi, int asserts);
 public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
 public data SlocDup = SlocDup(SLOC sloc, DUPS dups);
 public data Ratings = Ratings(Rating volume, Rating duplication, Rating unitSize, Rating ccfg, Rating ccwi, Rating testability);
@@ -131,5 +132,5 @@ public int sloc(list[MethodMetrics] metrics) {
 
 
 public int asserts(list[MethodMetrics] metrics) {
-	return ( 0 | it + m.asserts | m <-metrics);
+	return ( 0 | it + asserts | m <-metrics, MethodMetrics(_, _, _, _, _, asserts) := m);
 }
