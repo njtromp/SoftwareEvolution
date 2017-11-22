@@ -11,12 +11,13 @@ import util::StringCleaner;
 private int MIN_DUP_SIZE = 6;
 
 public void main() {
-	//set[loc] files = {|project://Session1/src/java/Duplicates.java|};
+	set[loc] files = {|project://Session1/src/java/Duplicates.java|};
 	//set[loc] files = {|project://Session1/src/java/NiftyDuplicates.java|};
 	//set[loc] files = {|project://SmallSql/src/smallsql/junit/TestTokenizer.java|};
 	//set[loc] files = {|project://SmallSql//src/smallsql/junit/AllTests.java|};
 	//set[loc] files = {|project://SmallSql//src/smallsql/database/StoreImpl.java|};
-	set[loc] files = find(|project://SmallSql|, "java");
+	//set[loc] files = find(|project://Session1|, "java");
+	//set[loc] files = find(|project://SmallSql|, "java");
 	//set[loc] files = find(|project://HsqlDB|, "java");
 	//set[loc] files = find(|project://HsqlDB/src/org/hsqldb/StatementDML.java|, "java");
 	//set[loc] files = find(|project://HsqlDB/src/org/hsqldb/TransactionManagerMV2PL.java|, "java");
@@ -29,7 +30,8 @@ public void main() {
 		list[str] codeBlock = [];
 		list[int] linesInBlock = [];
 		// This order of cleaning takes care of some tricky nested comments styles
-		str content = removeSingleLineComments(removeMultiLineComments(convertToNix(readFile(f))));
+		//str content = removeSingleLineComments(removeMultiLineComments(convertToNix(readFile(f))));
+		str content = cleanFile(readFile(f));
 		lines = split("\n", content);
 		print(".");
 		for (line <- lines) {

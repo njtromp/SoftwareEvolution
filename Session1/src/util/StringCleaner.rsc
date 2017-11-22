@@ -4,14 +4,8 @@ import IO;
 import List;
 import String;
 
-// Deprecated not in use anymore from outside this module
 public str removeEmptyLines(str text) {
-	cleanedText = visit(text) {
-		case /^[ \t]*\n/ => ""
-		case /(\s*\n)+/ => "\n"
-	};
-	// Dirty hack :-(
-	return endsWith(cleanedText, "\n") ? substring(cleanedText, 0, size(cleanedText) - 1) : cleanedText; 
+	return intercalate("\n", [ line | line <- split("\n", text), size(trim(line)) > 0]);
 }
 
 /*
@@ -84,8 +78,7 @@ public str removeMultiLineComments(str text) {
 		return text;
 	}
 	
-	list[str] removeEmptyLines(list[str] lines) = [ line | line <- lines, size(trim(line)) > 0];
-	return intercalate("\n", removeEmptyLines([removeMultiLine(s) | s <- split("\n", text)]));
+	return intercalate("\n", [removeMultiLine(s) | s <- split("\n", text)]);
 }
 
 public str removeSingleLineComments(str text) {
@@ -120,8 +113,7 @@ public str removeSingleLineComments(str text) {
 		return text;
 	}
 
-	list[str] removeEmptyLines(list[str] lines) = [ line | line <- lines, size(trim(line)) > 0];
-	return intercalate("\n", removeEmptyLines([removeSingleLine(s) | s <- split("\n", text)]));
+	return intercalate("\n", [removeSingleLine(s) | s <- split("\n", text)]);
 }
 
 public str convertToNix(str text) {
@@ -129,5 +121,5 @@ public str convertToNix(str text) {
 }
 
 public str cleanFile(str file) {
-	return removeEmptyLines(removeMultiLineComments(removeSingleLineComments(convertToNix(file))));
+	return removeEmptyLines(removeSingleLineComments(removeMultiLineComments(convertToNix(file))));
 }
