@@ -9,7 +9,6 @@ import analysis::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
 
-import DebugPrint;
 import CyclomaticComplexity;
 import FileIndexer;
 
@@ -30,8 +29,9 @@ public void runMetrics() {
 }
 
 public void findDuplicates() {
-	parseFiles(|project://SmallSql|);
-	//parseFiles(|project://Session1|);
+	parseFiles(|project://Session1|);
+	//parseFiles(|project://SmallSql|);
+	//parseFiles(|project://HsqlDB|);
 }
 
 public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
