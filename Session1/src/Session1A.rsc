@@ -12,49 +12,29 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import analysis::graphs::Graph;
-import SLOC;
-import Metrics;
 import util::FileSystem;
-import ControlFlowGraph;
+
+import SLOC;
+import Report;
+import Metrics;
 import Duplicates;
+import Testability;
+import ControlFlowGraph;
 import CyclomaticComplexity;
+
 import util::StringCleaner;
 import util::Visualize;
-
-private bool isATest(str path, set[str] testDirs) {
-	for (testDir <- testDirs) {
-		if (contains(path, testDir)) return true;
-	}
-	return false;
-}
-
-private int countAsserts(Statement stmt) {
-	asserts = 0;
-	top-down visit(stmt) {
-		case m:\methodCall(_, name, _) : {
-			if (startsWith(name, "assert")) {
-				asserts += 1;
-			}
-		}
-		case \methodCall(_, _, name, _) : {
-			if (startsWith(name, "assert")) {
-				asserts += 1;
-			}
-		}
-	}
-	return asserts;
-}
 
 public void main() {
 	
 	print("Analysing ");
 
-	//projectUnderTest = |project://Session1|;
-	//testFolders = {"/src/rascal/test/"};
+	projectUnderTest = |project://Session1|;
+	testFolders = {"/src/rascal/test/"};
 
 	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
-	projectUnderTest = |project://SmallSql|;
-	testFolders = {"/src/smallsql/junit/"};
+	//projectUnderTest = |project://SmallSql|;
+	//testFolders = {"/src/smallsql/junit/"};
 
 	//projectUnderTest = |project://HsqlDB|;
 	//testFolders = {"/src/org/hsqldb/test/"};
@@ -81,7 +61,6 @@ public void main() {
 	list[MethodMetrics] metrics = [];
 	className = "";
 	isTest = false;
-	numberOfAsserts = 0;
 	// Analyse AST
 	top-down visit (ast) {
 		case cl:class(_, _, _, _) : {
@@ -92,24 +71,25 @@ public void main() {
 			msloc = sloc(ctor);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
 			//println("[<className>/<className>()] [<msloc>]");
 		}
 		case init:initializer(stmt) : {
 			msloc = sloc(init);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
 			//println("[<className>/{}] [<msloc>]");
 		}
 		case mtd:method(_, name, _, _, stmt) : {
 			msloc = sloc(mtd);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
+			int asserts = 0;
 			if (isTest) {
-				numberOfAsserts += countAsserts(stmt);
-			};
-			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi);
+				asserts = countAsserts(stmt);
+			}
+			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, asserts);
 			//println("[<className>/<name>()] [<msloc>]");
 		}
 	}
@@ -141,9 +121,12 @@ public void main() {
 		
 	printComplexityRating("CFG", cfgComplexity);	
 	printComplexityRating("CWI", cwiComplexity);	
+	
+	printTestabilityRating(metrics);
 
 	println("==================================================\n");
-	println("Volume profile, lines of code [<totalSLOC>]");
+	println("Volume profile");
+	printVolumeProfile(totalSLOC);
 	println();
 
 	println("Duplication profile");
@@ -161,9 +144,10 @@ public void main() {
 	println("Complexity profile (CWI)");
 	printComplexityProfile(cwiComplexity);
 	println();
-	
-	println("Lines (test/production) <sloc([m|m<-metrics,m.isTest])*100/sloc([m|m<-metrics,!m.isTest])>%");
-	println("Number of asserts [<numberOfAsserts>]");
+
+	println("Testability profile");
+	printTestabilityProfile(metrics);
+	println();	
 	
 	println("\nDone");
 }

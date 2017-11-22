@@ -8,51 +8,20 @@ public alias SLOC = int;
 public alias DUPS = int;
 public alias ClassName = str;
 public alias MethodName = str;
-public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi);
+
+public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi, int asserts);
 public data Method = Methond(MethodName name, SLOC sloc, CC ccfg, CC ccwi);
 public data Class = Class(ClassName name, bool isTest, SLOC sloc, list[Method] methods);
 public data Project = Project(list[Class] classes);
 public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
 public data SlocDup = SlocDup(SLOC sloc, DUPS dups);
 
-
-public int sloc(MethodMetrics metrics) = metrics.sloc;
-
 public int sloc(list[MethodMetrics] metrics) {
 	return ( 0 | it + m.sloc | m <-metrics);
 }
 
-public void printVolumeRating(int sloc) {
-	rating = "--";
-	if (sloc < 66000) {
-		rating = "++";
-	} else if (sloc < 246000) {
-		rating = " +";
-	} else if (sloc < 665000) {
-		rating = " o";
-	} else if (sloc < 1310000) {
-		rating = " -";
-	}
-	println("Volume:           <rating>");
-}
-
-public void printDuplicationRating(SlocDup slocDup) {
-	dupPercentage = 100 * slocDup.dups / slocDup.sloc;
-	rating = "--";
-	if (dupPercentage <= 3) {
-		rating = "++";
-	} else if (dupPercentage <= 5) {
-		rating = " +";
-	} else if (dupPercentage <= 10) {
-		rating = " o";
-	} else if (dupPercentage <= 20) {
-		rating = " -";
-	}
-	println("Duplication:      <rating>");
-}
-
-public void printDuplicationProfile(SlocDup slocDup) {
-	println("Number of duplicate lines [<slocDup.dups>]");
+public int asserts(list[MethodMetrics] metrics) {
+	return ( 0 | it + m.asserts | m <-metrics);
 }
 
 public MetricsDistribution computeUnitSize(int totalSLOC, list[MethodMetrics] metrics) {
@@ -100,39 +69,3 @@ public MetricsDistribution computeComplexity(int totalSLOC, list[MethodMetrics] 
 		sloc(veryHighMethods) * 100 / totalSLOC
 	);	
 }
-
-public void printUnitSizeRating(MetricsDistribution distribution) {
-	str rating = "--";
-	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
-		rating = "++";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
-		rating = " +";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
-		rating = " o";
-	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
-		rating = " -";
-	}
-	println("Unit size:        <rating>");
-}
-
-public void printComplexityRating(str name, MetricsDistribution distribution) {
-	str rating = "--";
-	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
-		rating = "++";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
-		rating = " +";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
-		rating = " o";
-	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
-		rating = " -";
-	}
-	println("Complexity (<name>): <rating>");
-}
-
-public void printComplexityProfile(MetricsDistribution distribution) {
-	println("Very High: <distribution.veryHigh>");
-	println("High:      <distribution.high>");
-	println("Mod:       <distribution.moderate>");
-	println("Low:       <distribution.low>");
-}
-
