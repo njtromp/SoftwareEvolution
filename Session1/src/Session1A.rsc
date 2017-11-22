@@ -29,10 +29,10 @@ public void main() {
 	
 	print("Analysing ");
 
+	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
 	//projectUnderTest = |project://Session1|;
 	//testFolders = {"/src/rascal/test/"};
 
-	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
 	projectUnderTest = |project://SmallSql|;
 	testFolders = {"/src/smallsql/junit/"};
 
@@ -101,10 +101,10 @@ public void main() {
 	
 	// Complexity rating
 	int cfgCC(MethodMetrics m) = m.ccfg;
-	cfgComplexity = computeComplexity(totalSLOC, metrics, cfgCC);
+	cfgComplexity = computeComplexity(metrics, cfgCC);
 	print(".");
 	int cwiCC(MethodMetrics m) = m.ccwi;
-	cwiComplexity = computeComplexity(totalSLOC, metrics, cwiCC);
+	cwiComplexity = computeComplexity(metrics, cwiCC);
 	print(".");
 	unitSizes = computeUnitSize(totalSLOC, metrics);
 	
@@ -164,5 +164,5 @@ public void main() {
 	printTestabilityProfile(metrics);
 	println();	
 	
-	println("\nDone");
+	println("Done");
 }

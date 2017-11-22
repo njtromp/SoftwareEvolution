@@ -46,10 +46,10 @@ public void printDuplicationProfile(SlocDup slocDup) {
 }
 
 public void printComplexityProfile(MetricsDistribution distribution) {
-	println("Very High: <distribution.veryHigh>");
-	println("High:      <distribution.high>");
-	println("Mod:       <distribution.moderate>");
-	println("Low:       <distribution.low>");
+	println("Very High: <distribution.veryHigh>%");
+	println("High:      <distribution.high>%");
+	println("Mod:       <distribution.moderate>%");
+	println("Low:       <distribution.low>%");
 }
 
 public void printTestabilityProfile(list[MethodMetrics] metrics) {
@@ -59,7 +59,7 @@ public void printTestabilityProfile(list[MethodMetrics] metrics) {
 	productionSloc = sloc(productionMethods);
 	println("SLOC (test/production):    <100 * testSloc / productionSloc>% (<testSloc>, <productionSloc>)");
 	println("Methods (test/production): <100 * size(testMethods) / size(productionMethods)>% (<size(testMethods)>, <size(productionMethods)>)");
-	println("Number of asserts [<asserts(metrics)>]");
+	println("Number of asserts:         <asserts(metrics)>");
 }
 
 /*
@@ -70,7 +70,7 @@ private str rating(int rating) {
 	switch (rating) {
 		case PLUS_PLUS : return "++";
 		case PLUS : return " +";
-		case ZERO : return " 0";
+		case ZERO : return " o";
 		case MIN : return " -";
 		default : return "--";
 	}

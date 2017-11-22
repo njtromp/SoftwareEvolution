@@ -17,9 +17,6 @@ public alias ClassName = str;
 public alias MethodName = str;
 
 public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi, int asserts);
-public data Method = Methond(MethodName name, SLOC sloc, CC ccfg, CC ccwi);
-public data Class = Class(ClassName name, bool isTest, SLOC sloc, list[Method] methods);
-public data Project = Project(list[Class] classes);
 public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
 public data SlocDup = SlocDup(SLOC sloc, DUPS dups);
 public data Ratings = Ratings(Rating volume, Rating duplication, Rating unitSize, Rating ccfg, Rating ccwi, Rating testability);
@@ -46,19 +43,6 @@ public Rating duplicationRating(SlocDup slocDup) {
 	} else if (dupPercentage <= 10) {
 		return ZERO;
 	} else if (dupPercentage <= 20) {
-		return MIN;
-	}
-	return MIN_MIN;
-}
-
-public Rating distributionRating(MetricsDistribution distribution) {
-	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
-		return PLUS_PLUS;
-	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
-		return PLUS;
-	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
-		return ZERO;
-	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
 		return MIN;
 	}
 	return MIN_MIN;
@@ -109,6 +93,7 @@ public MetricsDistribution computeUnitSize(SLOC totalSLOC, list[MethodMetrics] m
 			veryHighMethods += m;
 		}
 	}
+	totalSLOC = sloc(metrics);
 	return MetricsDistribution(sloc(lowMethods) * 100 / totalSLOC,
 		sloc(moderateMethods) * 100 / totalSLOC,
 		sloc(highMethods) * 100 / totalSLOC,
@@ -116,7 +101,7 @@ public MetricsDistribution computeUnitSize(SLOC totalSLOC, list[MethodMetrics] m
 	);	
 }
 
-public MetricsDistribution computeComplexity(int totalSLOC, list[MethodMetrics] metrics, int (MethodMetrics) cc) {
+public MetricsDistribution computeComplexity(list[MethodMetrics] metrics, int (MethodMetrics) cc) {
 	list[MethodMetrics] lowMethods = [];
 	list[MethodMetrics] moderateMethods = [];
 	list[MethodMetrics] highMethods = [];
@@ -132,6 +117,7 @@ public MetricsDistribution computeComplexity(int totalSLOC, list[MethodMetrics] 
 			veryHighMethods += m;
 		}
 	}
+	totalSLOC = sloc(metrics);
 	return MetricsDistribution(sloc(lowMethods) * 100 / totalSLOC,
 		sloc(moderateMethods) * 100 / totalSLOC,
 		sloc(highMethods) * 100 / totalSLOC,

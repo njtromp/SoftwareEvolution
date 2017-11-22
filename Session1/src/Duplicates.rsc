@@ -20,39 +20,32 @@ public SlocDup determineDuplicates(set[loc] files) {
 		// Start fresh
 		list[str] codeBlock = [];
 		list[int] linesInBlock = [];
-		// This order of cleaning takes care of some tricky nested comments styles
-		//str content = removeSingleLineComments(removeMultiLineComments(convertToNix(readFile(f))));
 		str content = cleanFile(readFile(f));
 		lines = split("\n", content);
 		print("\b<stringChar(charAt("|/-\\", lineNr % 4))>");
 		for (line <- lines) {
 			line = trim(line);
 			lineNr += 1;
-			//if (line != "{" && line != "}") {
-				codeBlock += line;
-				linesInBlock += lineNr;
-				if (size(codeBlock) >= MIN_DUP_SIZE) {
-					if (	duplicateBlocks[codeBlock]?) {
-						duplicateBlocks[codeBlock] += toSet(linesInBlock);
-					} else {
-						//duplicateBlocks += (codeBlock:emptySet);
-						duplicateBlocks += (codeBlock:toSet(linesInBlock));
-					}
-					codeBlock = tail(codeBlock);
-					linesInBlock = tail(linesInBlock);
+			codeBlock += line;
+			linesInBlock += lineNr;
+			if (size(codeBlock) >= MIN_DUP_SIZE) {
+				if (	duplicateBlocks[codeBlock]?) {
+					duplicateBlocks[codeBlock] += toSet(linesInBlock);
+				} else {
+					duplicateBlocks += (codeBlock:toSet(linesInBlock));
 				}
-			//}
+				codeBlock = tail(codeBlock);
+				linesInBlock = tail(linesInBlock);
+			}
 		}
 	}
-	//println(duplicateBlocks);
-	//numberOfDupLines = size(union(range(duplicateBlocks)));
 	set[int] dupLines  = {};
 	for (key <- domain(duplicateBlocks)) {
 		s = size(duplicateBlocks[key]);
 		dupLines += s > MIN_DUP_SIZE ? duplicateBlocks[key] : {};
 	}
 	numberOfDupLines = size(dupLines);
-
+	
 	print("\b.");
 	return SlocDup(lineNr, numberOfDupLines);
 }
