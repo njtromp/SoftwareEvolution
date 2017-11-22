@@ -29,7 +29,6 @@ public void main() {
 	
 	print("Analysing ");
 
-	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
 	//projectUnderTest = |project://Session1|;
 	//testFolders = {"/src/rascal/test/"};
 
@@ -38,15 +37,7 @@ public void main() {
 
 	//projectUnderTest = |project://HsqlDB|;
 	//testFolders = {"/src/org/hsqldb/test/"};
-	
-	//set[loc] files = {|project://Session1/src/java/SimpleTest.java|};
-	//set[loc] files = {|project://Session1/src/java/NiftyDuplicates.java|};
-	//set[loc] files = {|project://SmallSql/src/smallsql/junit/TestTokenizer.java|};
-	//set[loc] files = {|project://SmallSql//src/smallsql/junit/AllTests.java|};
-	//set[loc] files = {|project://SmallSql//src/smallsql/database/StoreImpl.java|};
-	//set[loc] files = {|project://HsqlDB/src/org/hsqldb/StatementDML.java|};
-	//set[loc] files = {|project://HsqlDB/src/org/hsqldb/TransactionManagerMV2PL.java|};
-	
+		
 	set[loc] files = find(projectUnderTest, "java");
 	print(".");
 	
@@ -72,14 +63,12 @@ public void main() {
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
 			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
-			//println("[<className>/<className>()] [<msloc>]");
 		}
 		case init:initializer(stmt) : {
 			msloc = sloc(init);
 			ccfg = cyclomaticComplexityCFG(stmt);
 			ccwi = cyclomaticComplexityCWI(stmt);
 			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, 0);
-			//println("[<className>/{}] [<msloc>]");
 		}
 		case mtd:method(_, name, _, _, stmt) : {
 			msloc = sloc(mtd);
@@ -90,7 +79,6 @@ public void main() {
 				asserts = countAsserts(stmt);
 			}
 			metrics += metric = MethodMetrics(isTest, msloc, ccfg, ccwi, asserts);
-			//println("[<className>/<name>()] [<msloc>]");
 		}
 	}
 	print(".");
