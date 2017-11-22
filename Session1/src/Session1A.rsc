@@ -29,12 +29,12 @@ public void main() {
 	
 	print("Analysing ");
 
-	projectUnderTest = |project://Session1|;
-	testFolders = {"/src/rascal/test/"};
+	//projectUnderTest = |project://Session1|;
+	//testFolders = {"/src/rascal/test/"};
 
 	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
-	//projectUnderTest = |project://SmallSql|;
-	//testFolders = {"/src/smallsql/junit/"};
+	projectUnderTest = |project://SmallSql|;
+	testFolders = {"/src/smallsql/junit/"};
 
 	//projectUnderTest = |project://HsqlDB|;
 	//testFolders = {"/src/org/hsqldb/test/"};
@@ -106,23 +106,38 @@ public void main() {
 	int cwiCC(MethodMetrics m) = m.ccwi;
 	cwiComplexity = computeComplexity(totalSLOC, metrics, cwiCC);
 	print(".");
+	unitSizes = computeUnitSize(totalSLOC, metrics);
+	
+	Ratings ratings = Ratings(
+		slocRating(totalSLOC),
+		duplicationRating(slocDup),
+		distributionRating(unitSizes),
+		distributionRating(cfgComplexity),
+		distributionRating(cwiComplexity),
+		testabilityRating(totalSLOC, metrics)
+	);
 
 	println("\nAnalysis done.\n");
 	
 	// Reporting
 	println("==================================================");
 	println("Nico Tromp & Rob Kunst.");
+	println("--------------------------------------------------");
+	println("<projectUnderTest>");
 	println("==================================================");
-	printVolumeRating(totalSLOC);	
-
-	printDuplicationRating(slocDup);
-
-	printUnitSizeRating(unitSizes);
-		
-	printComplexityRating("CFG", cfgComplexity);	
-	printComplexityRating("CWI", cwiComplexity);	
+	printProjectRating(ratings);
+	println("--------------------------------------------------");
 	
-	printTestabilityRating(metrics);
+	printVolumeRating(ratings.volume);	
+
+	printDuplicationRating(ratings.duplication);
+
+	printUnitSizeRating(ratings.unitSize);
+		
+	printComplexityRating("CFG", ratings.ccfg);	
+	printComplexityRating("CWI", ratings.ccwi);	
+	
+	printTestabilityRating(ratings.testability);
 
 	println("==================================================\n");
 	println("Volume profile");

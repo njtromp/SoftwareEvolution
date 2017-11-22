@@ -7,67 +7,30 @@ import Metrics;
 /*
  * Ratings
  */
+ 
+ public void printProjectRating(Ratings ratings) {
+ 	projectRating = (ratings.volume + ratings.duplication + ratings.unitSize+ ratings.ccfg + ratings.testability ) / 5;
+	println("Project:          <rating(projectRating)>");
+ }
 
-public void printVolumeRating(int sloc) {
-	rating = "--";
-	if (sloc < 66000) {
-		rating = "++";
-	} else if (sloc < 246000) {
-		rating = " +";
-	} else if (sloc < 665000) {
-		rating = " o";
-	} else if (sloc < 1310000) {
-		rating = " -";
-	}
-	println("Volume:           <rating>");
+public void printVolumeRating(Rating slocRating) {
+	println("Volume:           <rating(slocRating)>");
 }
 
-public void printDuplicationRating(SlocDup slocDup) {
-	dupPercentage = 100 * slocDup.dups / slocDup.sloc;
-	rating = "--";
-	if (dupPercentage <= 3) {
-		rating = "++";
-	} else if (dupPercentage <= 5) {
-		rating = " +";
-	} else if (dupPercentage <= 10) {
-		rating = " o";
-	} else if (dupPercentage <= 20) {
-		rating = " -";
-	}
-	println("Duplication:      <rating>");
+public void printDuplicationRating(Rating dupRating) {
+	println("Duplication:      <rating(dupRating)>");
 }
 
-public void printUnitSizeRating(MetricsDistribution distribution) {
-	str rating = "--";
-	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
-		rating = "++";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
-		rating = " +";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
-		rating = " o";
-	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
-		rating = " -";
-	}
-	println("Unit size:        <rating>");
+public void printUnitSizeRating(Rating unitSizeRating) {
+	println("Unit size:        <rating(unitSizeRating)>");
 }
 
-public void printComplexityRating(str name, MetricsDistribution distribution) {
-	str rating = "--";
-	if (distribution.veryHigh == 0 && distribution.high == 0 && distribution.moderate <= 25) {
-		rating = "++";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 5 && distribution.moderate <= 30) {
-		rating = " +";
-	} else if (distribution.veryHigh == 0 && distribution.high <= 10 && distribution.moderate <= 40) {
-		rating = " o";
-	} else if (distribution.veryHigh <= 5 && distribution.high <= 15 && distribution.moderate <= 50) {
-		rating = " -";
-	}
-	println("Complexity (<name>): <rating>");
+public void printComplexityRating(str name, Rating ccRating) {
+	println("Complexity (<name>): <rating(ccRating)>");
 }
 
-public void printTestabilityRating(list[MethodMetrics] metrics) {
-	rating = " ?";
-	println("Testability:      <rating>");
+public void printTestabilityRating(Rating testabilityRating) {
+	println("Testability:      <rating(testabilityRating)>");
 }
 
 /*
@@ -95,3 +58,19 @@ public void printTestabilityProfile(list[MethodMetrics] metrics) {
 	println("Lines (test/production) <100 * testSloc / totalSloc>%");
 	println("Number of asserts [<asserts(metrics)>]");
 }
+
+/*
+ * Helpers
+ */
+
+private str rating(int rating) {
+	switch (rating) {
+		case PLUS_PLUS : return "++";
+		case PLUS : return " +";
+		case ZERO : return " 0";
+		case MIN : return " -";
+		default : return "--";
+	}
+}
+ 
+
