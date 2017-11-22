@@ -16,6 +16,7 @@ import SLOC;
 import Metrics;
 import util::FileSystem;
 import ControlFlowGraph;
+import Duplicates;
 import CyclomaticComplexity;
 import util::StringCleaner;
 import util::Visualize;
@@ -46,31 +47,42 @@ private int countAsserts(Statement stmt) {
 
 public void main() {
 	
-	println("Creating ASTs");
+	print("Analysing ");
 
 	//projectUnderTest = |project://Session1|;
 	//testFolders = {"/src/rascal/test/"};
 
+	//projectUnderTest = |project://Session1/src/java/Duplicates.java|;
 	projectUnderTest = |project://SmallSql|;
 	testFolders = {"/src/smallsql/junit/"};
 
 	//projectUnderTest = |project://HsqlDB|;
 	//testFolders = {"/src/org/hsqldb/test/"};
-
+	
+	//set[loc] files = {|project://Session1/src/java/SimpleTest.java|};
+	//set[loc] files = {|project://Session1/src/java/NiftyDuplicates.java|};
+	//set[loc] files = {|project://SmallSql/src/smallsql/junit/TestTokenizer.java|};
+	//set[loc] files = {|project://SmallSql//src/smallsql/junit/AllTests.java|};
+	//set[loc] files = {|project://SmallSql//src/smallsql/database/StoreImpl.java|};
+	//set[loc] files = {|project://HsqlDB/src/org/hsqldb/StatementDML.java|};
+	//set[loc] files = {|project://HsqlDB/src/org/hsqldb/TransactionManagerMV2PL.java|};
+	
+	set[loc] files = find(projectUnderTest, "java");
+	print(".");
+	
 	ast = createAstsFromEclipseProject(projectUnderTest, true);
-	println("ASTs created");
+	print(".");
 
-	print("Analysing");
-
-	// Volume 
-	totalSLOC = sloc(find(projectUnderTest, "java"));
-	//totalSLOC = 10000;
+	// Volume and duplicates
+	slocDup = determineDuplicates(files);
+	totalSLOC = slocDup.sloc;
 	print(".");
 	
 	list[MethodMetrics] metrics = [];
 	className = "";
 	isTest = false;
 	numberOfAsserts = 0;
+	// Analyse AST
 	top-down visit (ast) {
 		case cl:class(_, _, _, _) : {
 			className = cl.decl.path;
@@ -123,15 +135,19 @@ public void main() {
 	println("==================================================");
 	printVolumeRating(totalSLOC);	
 
-	printUnitSizeRating(unitSizes);	
+	printDuplicationRating(slocDup);
+
+	printUnitSizeRating(unitSizes);
 		
 	printComplexityRating("CFG", cfgComplexity);	
 	printComplexityRating("CWI", cwiComplexity);	
 
 	println("==================================================\n");
-	println("Volume profile <totalSLOC> lines of code");
+	println("Volume profile, lines of code [<totalSLOC>]");
 	println();
-	println("Unit size profile(s)");
+
+	println("Duplication profile");
+	printDuplicationProfile(slocDup);
 	println();
 
 	println("Unit size profile");

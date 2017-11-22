@@ -3,8 +3,9 @@ module Metrics
 import IO;
 import List;
 
-public alias SLOC = int;
 public alias CC = int;
+public alias SLOC = int;
+public alias DUPS = int;
 public alias ClassName = str;
 public alias MethodName = str;
 public data MethodMetrics = MethodMetrics(bool isTest, SLOC sloc, int ccfg, int ccwi);
@@ -12,11 +13,8 @@ public data Method = Methond(MethodName name, SLOC sloc, CC ccfg, CC ccwi);
 public data Class = Class(ClassName name, bool isTest, SLOC sloc, list[Method] methods);
 public data Project = Project(list[Class] classes);
 public data MetricsDistribution = MetricsDistribution(int low, int moderate, int high, int veryHigh);
+public data SlocDup = SlocDup(SLOC sloc, DUPS dups);
 
-/*
- * We don't count annotations when determining the SLOC
- * We don't count imports
- */
 
 public int sloc(MethodMetrics metrics) = metrics.sloc;
 
@@ -36,6 +34,25 @@ public void printVolumeRating(int sloc) {
 		rating = " -";
 	}
 	println("Volume:           <rating>");
+}
+
+public void printDuplicationRating(SlocDup slocDup) {
+	dupPercentage = 100 * slocDup.dups / slocDup.sloc;
+	rating = "--";
+	if (dupPercentage <= 3) {
+		rating = "++";
+	} else if (dupPercentage <= 5) {
+		rating = " +";
+	} else if (dupPercentage <= 10) {
+		rating = " o";
+	} else if (dupPercentage <= 20) {
+		rating = " -";
+	}
+	println("Duplication:      <rating>");
+}
+
+public void printDuplicationProfile(SlocDup slocDup) {
+	println("Number of duplicate lines [<slocDup.dups>]");
 }
 
 public MetricsDistribution computeUnitSize(int totalSLOC, list[MethodMetrics] metrics) {
@@ -118,3 +135,4 @@ public void printComplexityProfile(MetricsDistribution distribution) {
 	println("Mod:       <distribution.moderate>");
 	println("Low:       <distribution.low>");
 }
+
