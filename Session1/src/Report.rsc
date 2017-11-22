@@ -53,9 +53,12 @@ public void printComplexityProfile(MetricsDistribution distribution) {
 }
 
 public void printTestabilityProfile(list[MethodMetrics] metrics) {
-	testSloc = sloc([m|m<-metrics, m.isTest]);
-	totalSloc = sloc([m|m<-metrics, !m.isTest]);
-	println("Lines (test/production) <100 * testSloc / totalSloc>%");
+	testMethods = [m|m<-metrics, m.isTest];
+	productionMethods = [m|m<-metrics, !m.isTest];
+	testSloc = sloc(testMethods);
+	productionSloc = sloc(productionMethods);
+	println("SLOC (test/production):    <100 * testSloc / productionSloc>% (<testSloc>, <productionSloc>)");
+	println("Methods (test/production): <100 * size(testMethods) / size(productionMethods)>% (<size(testMethods)>, <size(productionMethods)>)");
 	println("Number of asserts [<asserts(metrics)>]");
 }
 
