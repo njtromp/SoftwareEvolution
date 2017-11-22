@@ -129,6 +129,7 @@ public int sloc(list[MethodMetrics] metrics) {
 	return ( 0 | it + m.sloc | m <-metrics);
 }
 
+
 public int asserts(list[MethodMetrics] metrics) {
 	return ( 0 | it + m.asserts | m <-metrics);
 }
