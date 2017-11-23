@@ -16,28 +16,28 @@ test bool testRemoveEmptyLines2()  = removeEmptyLines("\npublic")               
 test bool testRemoveEmptyLines3()  = removeEmptyLines("\n\npublic")             == "public";
 test bool testRemoveEmptyLines4()  = removeEmptyLines("public\n\n class")       == "public\n class";
 test bool testRemoveEmptyLines5()  = removeEmptyLines("public\n \n class")      == "public\n class";
-test bool testRemoveEmptyLines6()  = removeEmptyLines("public \n \t \n class")  == "public\n class";
+test bool testRemoveEmptyLines6()  = removeEmptyLines("public \n \t \n class")  == "public \n class";
 test bool testRemoveEmptyLines7()  = removeEmptyLines("public\n \t \nclass")    == "public\nclass";
 test bool testRemoveEmptyLines8()  = removeEmptyLines("public\n\n\nclass")      == "public\nclass";
 test bool testRemoveEmptyLines9()  = removeEmptyLines("public\n\n\nclass")      == "public\nclass";
 test bool testRemoveEmptyLines10() = removeEmptyLines("public\n\n\nclass\n\n")  == "public\nclass";
 test bool testRemoveEmptyLines11() = removeEmptyLines(toBeCleaned)              == cleaned;
 
-test bool testRemoveMultiLineCommentsSimple()          = removeMultiLineComments(simpleMultiLineComment) == "";
+test bool testRemoveMultiLineCommentsSimple()          = removeMultiLineComments(simpleMultiLineComment) == "\n\n\n";
 test bool testRemoveMultiLineComments()                = removeMultiLineComments(multiLineComment) == cleanMultiLineComment;
 test bool testRemoveMultiLineCommentsWithString()      = removeMultiLineComments(multiLineCommentWithString) == cleanMultiLineCommentWithString;
 test bool testRemoveMultiLineCommentsEmbedded()        = removeMultiLineComments(multiLineEmbedded)             == cleanMultiLineEmbedded;
 test bool testRemoveNastyMultiLineComments()           = removeMultiLineComments(nastyEmbeddedMultiLineComment) == nastyEmbeddedMultiLineComment;
-test bool testRemoveMultiLineWithEmbedEndTagInString() = removeMultiLineComments(nestedEndTagInString) == "";
+test bool testRemoveMultiLineWithEmbedEndTagInString() = removeMultiLineComments(nestedEndTagInString) == "        \n\n";
 test bool testRemoveMultiLineCommentsEmbeddedTags()    = removeMultiLineComments("if (line.equals(\"/*\") || line.equals(\"*/\")) {") == "if (line.equals(\"/*\") || line.equals(\"*/\")) {";
-test bool testRemoveMuliLineCommentsNestedString()     = removeMultiLineComments(quotesBetweenTags) == "";
+test bool testRemoveMuliLineCommentsNestedString()     = removeMultiLineComments(quotesBetweenTags) == "    ";
 test bool testRemoveMultiLineCommentsFunkyConstruct()  = removeMultiLineComments("                + pref + \"\\\"org.hsqldb.test.BlaineTrig\'\", expect);") == "                + pref + \"\\\"org.hsqldb.test.BlaineTrig\'\", expect);";
 
 test bool testSizeTestTokenizerCleaning()          = size(split("\n", cleanFile(readFile(|project://SmallSql/src/smallsql/junit/TestTokenizer.java|)))) == 105;
 
 test bool testRemoveSingleLineComments1() = removeSingleLineComments("//")                   == "";
 test bool testRemoveSingleLineComments2() = removeSingleLineComments("// Junk")              == "";
-test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "class";
+test bool testRemoveSingleLineComments3() = removeSingleLineComments("// Junk\nclass")       == "\nclass";
 test bool testRemoveSingleLineComments4() = removeSingleLineComments("public// Junk\nclass") == "public\nclass";
 test bool testRemoveSingleLineCommentWithURL()     = removeSingleLineComments("String HTTPS = \"https://\";") == "String HTTPS = \"https://\";";
 test bool testRemoveSingleLineCommentAfterString() = removeSingleLineComments("        addKeyWord( \"EXEC\",     EXECUTE); // alias for EXECUTE;") == "        addKeyWord( \"EXEC\",     EXECUTE); ";
@@ -67,6 +67,10 @@ public str multiLineComment = " int a = 1;
 ' */
 ' int b = 2;";
 public str cleanMultiLineComment = " int a = 1;
+' 
+'
+'
+'
 ' int b = 2;";
 
 public str multiLineCommentWithString = " int a = 1;
@@ -79,7 +83,13 @@ public str multiLineCommentWithString = " int a = 1;
 ' */
 ' int b = 2;";
 public str cleanMultiLineCommentWithString = " int a = 1;
+' 
+'
+'
 ' String name = \"RegEx\";
+' 
+'
+'
 ' int b = 2;";
 
 
@@ -89,6 +99,8 @@ public str multiLineEmbedded = "		final String SQL_3 =
 '			\"SELECT 10/2 /* this should stay */ \";
 ";
 public str cleanMultiLineEmbedded = "		final String SQL_3 = 
+'           
+'           
 '			\"SELECT 10/2 /* this should stay */ \";";
 
 public str nastyEmbeddedMultiLineComment = "		final String SQL_3 = 

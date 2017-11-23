@@ -37,7 +37,7 @@ public void findDuplicates() {
 public int sloc(set[loc] files) = sum({ linesOfCode(readFile(file)) | file <- files});
 
 public lrel[loc,int,lrel[loc,int]] slocForMethodsPerClass() {
-	model = createM3FromFile(|project://Session1/src/java/SimpleTest.java|);
+	model = createM3FromFile(|project://Session1/src/test/java/SimpleTest.java|);
 	return [ <cl, linesOfCode(readFile(cdl.src)), [ <m, linesOfCode(readFile(mdl.src))> | m <- model.containment[cl], isMethod(m), mdl <- model.declarations, mdl.name == m]> | cl <- classes(model), cdl <- model.declarations, cdl.name == cl];
 }
 
@@ -47,7 +47,7 @@ public lrel[loc,lrel[loc,int, set[loc]],int] testing() {
 }
 
 public void testing2() {
-	visit(head(createAstFromFile(|project://Session1/src/java/SimpleTest.java|, true).types)) { 
+	visit(head(createAstFromFile(|project://Session1/src/test/java/SimpleTest.java|, true).types)) { 
 		case /\method(_, name, _, _, stmt) : println("[<name>] [<cyclomaticComplexity(stmt)>]");
 		//case /\constructor(_, name, _, _, stmt) : println("[<name>] [stmt]");
 		//case /\bracket(_) : println("Bracket");
