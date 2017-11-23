@@ -8,7 +8,7 @@ import vis::Figure;
 import vis::Render;
 import ControlFlowGraph;
 
-// Big thansk to Ingmelen Marlin for sharing this code
+// Big thansk to Ingmelene Marlin for sharing this code
 public Figure createVisualisation(CFG g) {
    edges = [edge("<from>", "<to>", toArrow(triangle(5, fillColor("black")))) | <int from, int to> <- g ];
    nodes = [drawNode(n) | n <- carrier(g)];
