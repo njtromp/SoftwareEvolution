@@ -94,7 +94,6 @@ public void main() {
 	int cwiCC(MethodMetrics m) = m.ccwi;
 	cwiComplexity = computeComplexity(metrics, cwiCC);
 	print(".");
-	unitSizes = computeUnitSize(totalSLOC, metrics);
 	
 	Ratings ratings = Ratings(
 		slocRating(totalSLOC),
