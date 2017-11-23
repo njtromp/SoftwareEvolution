@@ -124,7 +124,7 @@ private CFG makeGraph(Node entry, Node exit, CFG graph, \while(condition, body))
 }
 
 private CFG makeGraph(Node entry, Node exit, CFG graph, \try(body, catches)) {
-	<catchNode, graph> = addNewNodeToEdge(entry, exit, graph);
+	<catchNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
 	return makeGraph(catchNode, exit, makeGraph(entry, catchNode, graph, body), catches);
 }
 
@@ -135,7 +135,7 @@ private CFG makeGraph(Node entry, Node exit, CFG graph, \try(tryBody, catches, f
 }
 
 private CFG makeGraph(Node entry, Node exit, CFG graph, \catch(_, body)) {
-	<newNode, graph> = insertNewNodeIntoEdge(entry, exit, graph);
+	<newNode, graph> = addNewNodeToEdge(entry, exit, graph);
 	return makeGraph(entry, newNode, graph, body);
 }
 

@@ -26,7 +26,6 @@ public int cyclomaticComplexityCWI(Statement stmt) {
         case \if(_,_) : cc += 1;
         case \if(_,_,_) : cc += 1;
         case \case(_) :  cc += 1;
-        case \defaultCase() :  cc += 1;
         case \do(_,_) :  cc += 1;
         case \while(_,_) :  cc += 1;
         case \for(_,_,_) :  cc += 1;
