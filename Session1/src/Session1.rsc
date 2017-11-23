@@ -1,4 +1,4 @@
-module Session1A
+module Session1
 
 import IO;
 import Set;
