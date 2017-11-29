@@ -8,42 +8,79 @@ import String;
 import util::FileSystem;
 import util::StringCleaner;
 
+public data LineInfo = LineInfo(str fileName, int actual, int logical);
+
 public void detectDuplicates(set[loc] files, int duplicationThreshold) {
-	print(".");
-	int lineNr = 0;
-	set[tuple[str, int]] emptySet = {};
-	map[list[str], set[tuple[str, int]]] duplicateBlocks = ();
+	map[list[str], list[LineInfo]] duplicateBlocks = ();
+	list[LineInfo] emptyLineInfo = [];
+	int logicalNr = 0;
 	for (f <- files) {
-		print("\b<stringChar(charAt("|/-\\", lineNr % 4))>");
 		// Start fresh
-		lineNr = 0;
+		int lineNr = 0;
 		list[str] codeBlock = [];
-		list[tuple[str, int]] linesInBlock = [];
+		list[LineInfo] linesInBlock = [];
 		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
 		for (line <- lines) {
 			lineNr += 1;
 			line = trim(line);
-			if (size(line) >= 0) {
+			if (!isEmpty(line)) {
+				logicalNr += 1;
 				codeBlock += line;
-				linesInBlock += <f.path, lineNr>;
+				linesInBlock += LineInfo(f.path, lineNr, logicalNr);
+				//linesInBlock += LineInfo("", lineNr, logicalNr);
 				if (size(codeBlock) == duplicationThreshold) {
-					set[tuple[str, int]] bla = toSet(linesInBlock);
- 					duplicateBlocks[codeBlock] ? emptySet += bla;
+ 					duplicateBlocks[codeBlock] ? emptyLineInfo += linesInBlock;
 					codeBlock = tail(codeBlock);
 					linesInBlock = tail(linesInBlock);
 				}
 			}
 		}
 	}
-	dups = sort(toList(union({ dups | dups <- range(duplicateBlocks), size(dups) > duplicationThreshold})));	
-	print("\b.");
+	dups = (block : duplicateBlocks[block] | block <- duplicateBlocks, size(duplicateBlocks[block]) > duplicationThreshold);
+	//println(dups);
 
-	str currentFile = "";	
-	for (<fileName, l> <- dups) {
-		if (currentFile != fileName){
-			currentFile = fileName;
-			println(fileName);
+	blockInfos = [duplicateBlocks[block] | block <- dups];
+	//println(blockInfos);
+	
+	classSets = sort({ logical | blockInfo <- blockInfos, LineInfo(_, _, logical) <- blockInfo[duplicationThreshold..]});
+	//println(classSets);
+
+	fragments = detectFragments(classSets, duplicationThreshold);
+	println(fragments);
+
+	blas = sort(range(dups));
+	tuple[LineInfo, LineInfo] findOccurences(int logical) {
+		for (bla <- blas) {
+			int i = duplicationThreshold;
+			while (i < size(bla) && bla[i].logical != logical) i += 1;
+			if (i < size(bla)) {
+				return <bla[i % duplicationThreshold], bla[i]>;
+			}
 		}
-		println(l);
+	}
+	for (fragment <- fragments) {
+		println("Clones");
+		for (logical <- fragment) {
+			<first, second> = findOccurences(logical);
+			println("<first.fileName>:<first.actual>, <second.fileName>:<second.actual>");
+		}
+	}	
+}
+
+public list[list[int]] createSlidingBlocks(list[int] fragment, int duplicationThreshold) {
+	return [fragment[startt..startt + duplicationThreshold] | startt <- [0..size(fragment)-duplicationThreshold+1]];
+}
+
+public list[list[int]] detectFragments(list[int] lines, int threshold) {
+	if (size(lines) > threshold) {
+		int next = threshold - 1;
+		while (next < size(lines) && lines[next - 1] + 1 == lines[next]) next += 1;
+		if (next == size(lines)) {
+			return [lines];
+		} else {
+			return [lines[0..next]] + detectFragments(lines[next..], threshold);
+		}
+	} else {
+		return [lines];
 	}
 }
