@@ -5,7 +5,11 @@ import List;
 import String;
 
 public str removeEmptyLines(str text) {
-	return intercalate("\n", [ line | line <- split("\n", text), size(trim(line)) > 0]);
+	return intercalate("\n", removeEmptyLines(split("\n", text)));
+}
+
+public list[str] removeEmptyLines(list[str] lines) {
+	return [ line | line <- lines, size(trim(line)) > 0];
 }
 
 /*
@@ -19,7 +23,11 @@ public str removeEmptyLines(str text) {
  * }
  * And all kind of variantions. 
  */
-public str removeMultiLineComments(str text) {
+public str removeMultiLineComments(str text) {	
+	return intercalate("\n", removeMultiLineComments(split("\n", text)));
+}
+
+public list[str] removeMultiLineComments(list[str] lines) {
 	bool insideComment = false;
 	
 	str removeMultiLine(str text) {
@@ -78,11 +86,14 @@ public str removeMultiLineComments(str text) {
 		return text;
 	}
 	
-	return intercalate("\n", [removeMultiLine(s) | s <- split("\n", text)]);
+	return [ removeMultiLine(line) | line <- lines];
 }
 
 public str removeSingleLineComments(str text) {
+	return intercalate("\n", removeSingleLineComments(split("\n", text)));
+}
 
+public list[str] removeSingleLineComments(list[str] lines) {
 	str removeSingleLine(str text) {
 	 	marker = findFirst(text, "//");
 		if (marker == -1) {
@@ -112,8 +123,7 @@ public str removeSingleLineComments(str text) {
 		println("Please have a closer look at single-line comment handling of:\n[<text>]");
 		return text;
 	}
-
-	return intercalate("\n", [removeSingleLine(s) | s <- split("\n", text)]);
+	return [removeSingleLine(line) | line <- lines];
 }
 
 public str convertToNix(str text) {
@@ -122,4 +132,8 @@ public str convertToNix(str text) {
 
 public str cleanFile(str file) {
 	return removeEmptyLines(removeSingleLineComments(removeMultiLineComments(convertToNix(file))));
+}
+
+public list[str] cleanFile(list[str] file) {
+	return removeEmptyLines(removeSingleLineComments(removeMultiLineComments(file)));
 }
