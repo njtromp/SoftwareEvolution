@@ -1,4 +1,4 @@
-package java;
+package test.java;
 public class SimpleTest { 
     public void checkIfIfGraph(int a, int b) {
 		int x = 1;

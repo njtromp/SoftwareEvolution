@@ -1,4 +1,4 @@
-package java;
+package test.java;
 public class Duplicates {
 	public void method1() {
 		int a = 1;

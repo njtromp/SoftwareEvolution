@@ -1,7 +1,7 @@
 /*
  * Licence
  */
-package java;
+package test.java;
 
 import java.io.IOException;
 

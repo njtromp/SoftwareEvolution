@@ -1,4 +1,4 @@
-package java.nested;
+package test.java.nested;
 
 import java.lang.Math;
 

@@ -1,4 +1,4 @@
-package java;
+package test.java;
 
 public class NiftyDuplicates {
 	private int a,b,c,d,x;
