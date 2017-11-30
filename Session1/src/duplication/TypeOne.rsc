@@ -16,6 +16,7 @@ public void detectDuplicates(set[loc] files, int duplicationThreshold) {
 	list[LineInfo] emptyLineInfo = [];
 	int logicalNr = 0;
 	for (f <- files) {
+		print(".");
 		int lineNr = 0;
 		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
 		for (line <- lines) {
@@ -33,6 +34,7 @@ public void detectDuplicates(set[loc] files, int duplicationThreshold) {
 			}
 		}
 	}
+	println();
 	println("-------------------------------------------------------");
 	println("Unique line info");	
 	println(uniqueLines);
@@ -41,8 +43,7 @@ public void detectDuplicates(set[loc] files, int duplicationThreshold) {
 	println("-------------------------------------------------------");
 	println("Duplicated lines");
 	println(duplicatedLines);
-	
-	duplicatedLines = sort(dup(duplicatedLines), bool(LineInfo a, LineInfo b) { return a.logical < b.logical;	});
+	duplicatedLines = sort(dup(duplicatedLines), bool(LineInfo a, LineInfo b) { return a.logical < b.logical; });
 	println("-------------------------------------------------------");
 	println("Duplicated lines (sorted)");
 	println(duplicatedLines);
@@ -56,7 +57,27 @@ public void detectDuplicates(set[loc] files, int duplicationThreshold) {
 	println("-------------------------------------------------------");
 	println("Fragments (large enough)");
 	println(fragments);
+	
+	map[list[LineInfo], list[list[LineInfo]]] cloneClasses = ();
+	for (fragment <- fragments) {
+		classId = [ lineInfo | LineInfo(_, _, _, lineInfo) <- fragment];
+		if (!cloneClasses[classId]?) {
+			cloneClasses += (classId:[classId]);
+		}
+		cloneClasses[classId] += [clean(fragment)];
+	}
+	println("-------------------------------------------------------");
+	println("Clone classes");
+	for (cloneClass <- cloneClasses) {
+		println("CloneClass: <cloneClass>");
+		for (clone <- cloneClasses[cloneClass]) {
+			println(clone);
+		}
+	}
+}
 
+public list[LineInfo] clean(list[LineInfo] fragment) {
+	return [LineInfo(src, actual, logical) | LineInfo(src, actual, logical, _) <- fragment];
 }
 
 public list[list[LineInfo]] detectFragments(list[LineInfo] lines) {
