@@ -8,77 +8,65 @@ import String;
 import util::FileSystem;
 import util::StringCleaner;
 
-public data LineInfo = LineInfo(str fileName, int actual, int logical);
+public data LineInfo = LineInfo(str fileName, int actual, int logical)
+					 | LineInfo(str fileName, int actual, int logical, LineInfo other);
 
 public void detectDuplicates(set[loc] files, int duplicationThreshold) {
-	map[list[str], list[LineInfo]] duplicateBlocks = ();
+	map[str, list[LineInfo]] uniqueLines = ();
 	list[LineInfo] emptyLineInfo = [];
 	int logicalNr = 0;
 	for (f <- files) {
-		// Start fresh
 		int lineNr = 0;
-		list[str] codeBlock = [];
-		list[LineInfo] linesInBlock = [];
 		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
 		for (line <- lines) {
 			lineNr += 1;
 			line = trim(line);
 			if (!isEmpty(line)) {
 				logicalNr += 1;
-				codeBlock += line;
-				linesInBlock += LineInfo(f.path, lineNr, logicalNr);
-				//linesInBlock += LineInfo("", lineNr, logicalNr);
-				if (size(codeBlock) == duplicationThreshold) {
- 					duplicateBlocks[codeBlock] ? emptyLineInfo += linesInBlock;
-					codeBlock = tail(codeBlock);
-					linesInBlock = tail(linesInBlock);
+				if (uniqueLines[line]?) {
+					lineInfo = LineInfo(split("/", f.path)[4], lineNr, logicalNr, uniqueLines[line][0]);
+					uniqueLines[line] += [lineInfo];
+				} else {
+					lineInfo = LineInfo(split("/", f.path)[4], lineNr, logicalNr);
+					uniqueLines += (line:[lineInfo]);
 				}
 			}
 		}
 	}
-	dups = (block : duplicateBlocks[block] | block <- duplicateBlocks, size(duplicateBlocks[block]) > duplicationThreshold);
-	//println(dups);
+	println("-------------------------------------------------------");
+	println("Unique line info");	
+	println(uniqueLines);
 
-	blockInfos = [duplicateBlocks[block] | block <- dups];
-	//println(blockInfos);
+	duplicatedLines = [ lineInfo | line <- uniqueLines, lineInfo:LineInfo(_, _, _, _) <- uniqueLines[line], size(uniqueLines[line]) > 1];
+	println("-------------------------------------------------------");
+	println("Duplicated lines");
+	println(duplicatedLines);
 	
-	classSets = sort({ logical | blockInfo <- blockInfos, LineInfo(_, _, logical) <- blockInfo[duplicationThreshold..]});
-	//println(classSets);
-
-	fragments = detectFragments(classSets, duplicationThreshold);
+	duplicatedLines = sort(dup(duplicatedLines), bool(LineInfo a, LineInfo b) { return a.logical < b.logical;	});
+	println("-------------------------------------------------------");
+	println("Duplicated lines (sorted)");
+	println(duplicatedLines);
+	
+	fragments = detectFragments(duplicatedLines);
+	println("-------------------------------------------------------");
+	println("Fragments");
+	println(fragments);
+	
+	fragments = [fragment | fragment <- fragments, size(fragment) >= duplicationThreshold];
+	println("-------------------------------------------------------");
+	println("Fragments (large enough)");
 	println(fragments);
 
-	blas = sort(range(dups));
-	tuple[LineInfo, LineInfo] findOccurences(int logical) {
-		for (bla <- blas) {
-			int i = duplicationThreshold;
-			while (i < size(bla) && bla[i].logical != logical) i += 1;
-			if (i < size(bla)) {
-				return <bla[i % duplicationThreshold], bla[i]>;
-			}
-		}
-	}
-	for (fragment <- fragments) {
-		println("Clones");
-		for (logical <- fragment) {
-			<first, second> = findOccurences(logical);
-			println("<first.fileName>:<first.actual>, <second.fileName>:<second.actual>");
-		}
-	}	
 }
 
-public list[list[int]] createSlidingBlocks(list[int] fragment, int duplicationThreshold) {
-	return [fragment[startt..startt + duplicationThreshold] | startt <- [0..size(fragment)-duplicationThreshold+1]];
-}
-
-public list[list[int]] detectFragments(list[int] lines, int threshold) {
-	if (size(lines) > threshold) {
-		int next = threshold - 1;
-		while (next < size(lines) && lines[next - 1] + 1 == lines[next]) next += 1;
+public list[list[LineInfo]] detectFragments(list[LineInfo] lines) {
+	if (size(lines) > 1) {
+		int next = 1;
+		while (next < size(lines) && lines[next - 1].logical + 1 == lines[next].logical && lines[next - 1].other.logical + 1 == lines[next].other.logical) next += 1;
 		if (next == size(lines)) {
 			return [lines];
 		} else {
-			return [lines[0..next]] + detectFragments(lines[next..], threshold);
+			return [lines[0..next]] + detectFragments(lines[next..]);
 		}
 	} else {
 		return [lines];
