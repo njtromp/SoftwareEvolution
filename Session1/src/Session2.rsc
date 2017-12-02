@@ -10,6 +10,8 @@ import util::SuffixTree;
 import util::StringCleaner;
 import duplication::TypeOne;
 
+private Node root = Node([], ());
+
 public void main(loc project, int duplicationThreshold = 6) {
 	println("======================");
 	println("Nico Tromp & Rob Kunst");
@@ -26,9 +28,10 @@ public void main(loc project, int duplicationThreshold = 6) {
 
 	print("\nDetecting Type I clones");
 	int analyzedMethods = 0;
+	root = Node([], ());
 	visit (ast) {
 		case \method(_, name, _, _, body) : {
-			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicates")) {
+			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
 			//if (linesIn(body) >= duplicationThreshold) {
 				analyzedMethods += 1;
 				content = files[body.src.path];
@@ -41,8 +44,6 @@ public void main(loc project, int duplicationThreshold = 6) {
 
 	println("\nDone");
 }
-
-private Node root = Node([], ());
 
 private void analyze(list[str] lines, int cloneStart, int threshold) {
 	list[str] suffix = [];
