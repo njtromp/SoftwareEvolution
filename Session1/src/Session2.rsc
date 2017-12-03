@@ -3,11 +3,12 @@ module Session2
 import IO;
 import List;
 import String;
-import util::ValueUI;
 import util::FileSystem;
 import lang::java::jdt::m3::AST;
 import util::StringCleaner;
+import util::SuffixTree;
 import duplication::TypeOne;
+import duplication::CloneClasses;
 
 public void main(loc project, int duplicationThreshold = 6) {
 	println("======================");
@@ -24,8 +25,10 @@ public void main(loc project, int duplicationThreshold = 6) {
 	ast = createAstsFromEclipseProject(project, true);
 
 	print("\nDetecting Type-I clones");
-	detectTypeIClones(files, ast, duplicationThreshold);
-	print("\nAnalyzed <getAnalyzedMethodsCount()> methods");
+	Node typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
+	println("\nAnalyzed <getAnalyzedMethodsCount()> methods");
+	print("Detecting clone-classes");
+	detectCloneClasses(typeOneClones, duplicationThreshold);
 
 	println("\nDone");
 }

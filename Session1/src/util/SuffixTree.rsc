@@ -3,22 +3,22 @@ module util::SuffixTree
 import Map;
 import List;
 
-public data Node = Node(list[&V] values, map[&k, Node] next);
+public data Node = Node(list[&V] keys, map[&k, Node] next);
 
-public Node put(Node root, list[&K] suffixes, &V val) {
-	suffix = head(suffixes);
-	remainder = tail(suffixes);
+public Node put(Node root, list[&K] keys, &V val) {
+	key = head(keys);
+	remainder = tail(keys);
 	if (isEmpty(remainder)) {
-		if (root.next[suffix]?) {
-			root.next[suffix].values += [val];
+		if (root.next[key]?) {
+			root.next[key].keys += [val];
 		} else {
-			root.next += (suffix:Node([val], ()));
+			root.next += (key:Node([val], ()));
 		}
 	} else {
-		if (!root.next[suffix]?) {
-			root.next += (suffix:Node([], ()));
+		if (!root.next[key]?) {
+			root.next += (key:Node([], ()));
 		}
-		root.next[suffix] = put(root.next[suffix], remainder, val);
+		root.next[key] = put(root.next[key], remainder, val);
 	}
 	return root;
 }
