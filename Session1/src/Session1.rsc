@@ -21,6 +21,7 @@ import Duplicates;
 import Testability;
 import ControlFlowGraph;
 import CyclomaticComplexity;
+import ASTParser;
 
 import util::StringCleaner;
 import util::Visualize;
