@@ -3,10 +3,13 @@ module Playground
 import IO;
 import Node;
 import List;
+import String;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import util::ValueUI;
+import util::SuffixTree;
 import util::StringCleaner;
+
 
 public void play() {
 	ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
@@ -29,4 +32,15 @@ public str hashAST(list[Statement] stmts) {
 
 public str hashAST(node tree) {
 	return "<getName(tree)>_<intercalate("", [hashAST(child) | node child <- getChildren(tree)])>";
+}
+
+public void createSuffixTree() {
+	list[str] example = ["a", "a", "b", "x", "y", "a", "a", "b", "$"];
+	list[str] suffix = [];
+	Node root = Node([], ());
+	for (i <- [size(example)-1..-1]) {
+		suffix = example[i] + suffix;
+		root = put(root, suffix, i+1);
+	}    
+    visualizeSuffixTree(root);
 }
