@@ -18,7 +18,7 @@ public void main(loc project, int duplicationThreshold = 6) {
 	print("Loading files");
 	map[str,list[str]] files = ();
 	for (f <- find(project, "java")) {
-		files += (f.path:removeSingleLineComments(removeMultiLineComments(readFileLines(f))));
+		files += (f.path : removeSingleLineComments(removeMultiLineComments(readFileLines(f))));
 	}
 
 	print("\nLoading AST");
@@ -27,7 +27,7 @@ public void main(loc project, int duplicationThreshold = 6) {
 	print("\nDetecting Type-I clones");
 	Node typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedMethodsCount()> methods");
-	print("Detecting clone-classes");
+	print("Detecting clone-classes\n");
 	detectCloneClasses(typeOneClones, duplicationThreshold);
 
 	println("\nDone");
