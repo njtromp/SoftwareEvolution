@@ -61,8 +61,8 @@ public void compareAST(loc location) {
 	ast = createAstFromFile(location, true);
 
 	visit(ast){
-		case \compilationUnit(_, types): hash = hashAST(types);
-		case \compilationUnit(_, _, types): hash = hashAST(types);
+		case c:\compilationUnit(_, types): hash = hashAST(types);
+		case c:\compilationUnit(_, _, types): hash = hashAST(types);
 		case m:\method(_, name, parameters, exceptions, b:\block(stmts)): {
 			println("creating hash");
 			println(hashAST(stmts));
@@ -90,13 +90,13 @@ public void compareAST(loc location) {
 		
 		case \annotationType(_, tree): hashAST(tree);
 		case \parameter(t, name, val):  {
-			print("parameter");
-			print(t);
-			print(name);
-			println(val);
+			print("parameter: ");
+			println(t);
+			//println(name);
+			//println(val);
 		}
 		case \vararg(t, name):{
-			print("vararg");
+			print("vararg: ");
 			print(t);
 			print(name);
 		}
@@ -144,7 +144,7 @@ public void astTest() {
 
 
 public void astTest2() {
-	compareAST(|project://Session1/src/test/java/SimpleTest.java|);
+	compareAST(|project://Session1/src/test/java/SimpleJava.java|);
 }
 
 public str hashAST(list[Statement] stmts) {
