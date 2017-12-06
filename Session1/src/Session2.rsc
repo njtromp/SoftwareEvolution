@@ -27,7 +27,7 @@ public void main(loc project, int duplicationThreshold = 6) {
 	print("\nDetecting Type-I clones");
 	Node typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedMethodsCount()> methods");
-	print("Detecting clone-classes\n");
+	print("Detecting clone-classes");
 	detectCloneClasses(typeOneClones, duplicationThreshold);
 
 	println("\nDone");
