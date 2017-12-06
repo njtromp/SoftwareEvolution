@@ -79,21 +79,26 @@ public void compareAST(loc location) {
 			print(\type);
 			println(fragments);
 		}
-		case \class(_, tree1, tree2, tree3): hashAST(tree1 + tree2 + tree3);
-		case \class(tree): hashAST(tree);
-		case \interface(_, tree1, tree2, tree3): hashAST(tree1 + tree2 + tree3);
+		case \class(_, extends, implements, body): hashAST(extends + implements + body);
+		case \class(body): hashAST(body);
+		case \interface(_, extends, implements, body): hashAST(extends + implements + body);
 		
 		case \field(_, tree): hashAST(tree);
 
-		case \constructor(_, tree1, tree2, _): hashAST(tree1 + tree2);
+		case \constructor(_, params, expression, _): hashAST(params + expression);
 		case \variables(_, tree): hashAST(tree);
 		
 		case \annotationType(_, tree): hashAST(tree);
-		case \parameter(t, name, val):{
-			print("todo");
+		case \parameter(t, name, val):  {
+			print("parameter");
+			print(t);
+			print(name);
+			println(val);
 		}
 		case \vararg(t, name):{
-			print("todo");
+			print("vararg");
+			print(t);
+			print(name);
 		}
 		
 	}
