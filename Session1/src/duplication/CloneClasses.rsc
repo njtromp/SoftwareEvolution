@@ -12,27 +12,29 @@ public void detectCloneClasses(Node root, int threshold) {
 	//text(root);
 	//visualizeSuffixTree(root);
 
+	print(".");
 	root = removeLinearBranches(root);
-	print(".");
-	root = removeSmallClones(root, threshold);
-	print(".");
+	print("\b+");
 
-	text(root);
-	visualizeSuffixTree(root);
+	//text(root);
+	//visualizeSuffixTree(root);
+
+	list[str] empty = [];
+	print(".");
+	detect(root, 1, threshold, false, empty);
+	print("\b+");
 
 	println("\nNr of Clones: <numberOfClones(root)>");
-	list[str] empty = [];
-	detect(root, 1, threshold, false, empty);
 }
 
 private bool detect(Node \node, int threshold, int level, bool bla, list[&K] fragment) {
 	bool cloneDetected = false;
-	for (key <- \node.next) {
-		if (!detect(\node.next[key], threshold, level+1, bla, fragment + key) && level >= threshold && size(\node.values) > 1) {
-			cloneDetected = true;
-			println(fragment);
-		}
-	}
+	//for (key <- \node.next) {
+	//	if (!detect(\node.next[key], threshold, level+1, bla, fragment + key) && level >= threshold && size(\node.values) > 1) {
+	//		cloneDetected = true;
+	//		//println(fragment);
+	//	}
+	//}
 	return cloneDetected;
 }
 

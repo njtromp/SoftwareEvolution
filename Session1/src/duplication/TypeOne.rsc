@@ -18,8 +18,10 @@ public data CloneInfo = CloneInfo(str fileName, int begin, int end);
 public Node detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
 	analyzedMethods = 0;
 	Node root = Node([], (), ());
+	print(".");
 	visit (asts) {
 		case \method(_, name, _, _, body) : {
+			print("\b<stringChar(charAt("|/-\\", analyzedMethods % 4))>");
 			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicates")) {
 			//if (linesIn(body) >= duplicationThreshold) {
 				analyzedMethods += 1;
@@ -29,6 +31,7 @@ public Node detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, i
 			}
 		}
 	}	
+	print("\b ");
 	return root;
 }
 

@@ -44,11 +44,6 @@ private bool isUnbranched(Node root) {
 	}
 }
 
-public Node removeSmallClones(Node root, int threshold) {
-	return root;
-}
-
-
 public void visualizeSuffixTree(Node root) {
 	int nodeId = 0;
 	list[Edge] edges = [];
