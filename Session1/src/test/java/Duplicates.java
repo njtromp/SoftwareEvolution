@@ -1,5 +1,10 @@
 package test.java;
 public class Duplicates {
+	
+	int x = 123;
+	boolean isAValue = true;
+	
+	
 	public void method1() {
 		int a = 1;
 		method2();
