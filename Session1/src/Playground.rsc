@@ -12,13 +12,18 @@ import util::StringCleaner;
 
 
 public void play() {
-	ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
+	//ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
+	ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
 	println(ast.src.path);
 	list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(ast.src)));
 	visit (ast) {
 		case m:\method(_, name, _, _, b:\block(stmts)) : {
 			println("\n<m.src.path>.<name>(): (<b.src.begin.line>, <b.src.end.line>)");
-			println("Hashed tree [<hashAST(stmts)>]");
+			list[str] hashes = hashAST(stmts);
+			println("Hashed tree for method <name>()");
+			for (line <- hashes) {
+				println(line);
+			}
 		}
 	}
 }
@@ -26,18 +31,30 @@ public void play() {
 /* The signature should most likely be changed to list[str]. This will make it possible
  * to generate a separate hash for every level in the tree.
  */ 
-public str hashAST(list[Statement] stmts) {
-	return intercalate("+", [ hashAST(stmt) | node stmt <- stmts]);
+public list[str] hashAST(list[Statement] stmts) {
+	list[str] result = [];
+	for (node stmt <- stmts) {
+		result += hashAST(stmt); 
+	}
+	return result;
 }
 
-public str hashAST(node tree) {
-	return "<getName(tree)>_<intercalate("", [hashAST(child) | node child <- getChildren(tree)])>";
+
+public list[str] hashAST(block(list[Statement] stmts)) {
+	return hashAST(stmts);
 }
 
+public list[str] hashAST(node tree) {
+	list[str] result = [];
+	for (node child <- getChildren(tree)) {
+		result += hashAST(child); 
+	}
+	return getName(tree) + result;
+}
 public void createSuffixTree() {
 	list[str] example = ["a", "a", "b", "x", "y", "a", "a", "b", "$"];
 	list[str] suffix = [];
-	Node root = Node([], ());
+	Node root = Node(());
 	for (i <- [size(example)-1..-1]) {
 		suffix = example[i] + suffix;
 		root = put(root, suffix, i+1);
