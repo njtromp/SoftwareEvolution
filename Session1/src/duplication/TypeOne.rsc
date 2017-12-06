@@ -17,7 +17,7 @@ public data CloneInfo = CloneInfo(str fileName, int begin, int end);
 
 public Node detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
 	analyzedMethods = 0;
-	Node root = Node([], ());
+	Node root = Node([], (), ());
 	visit (asts) {
 		case \method(_, name, _, _, body) : {
 			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicates")) {

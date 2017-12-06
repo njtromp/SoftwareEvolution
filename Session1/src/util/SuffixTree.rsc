@@ -1,11 +1,13 @@
 module util::SuffixTree
 
 import Map;
+import Set;
 import List;
 import vis::Figure;
 import vis::Render;
 
-public data Node = Node(list[&V] values, map[&k, Node] next);
+public data Node = Node(list[&V] values, map[&k, Node] next, map[&V, Node] links)
+				  | Null();
 
 public Node put(Node root, list[&K] suffixes, &V val) {
 	suffix = head(suffixes);
@@ -14,16 +16,38 @@ public Node put(Node root, list[&K] suffixes, &V val) {
 		if (root.next[suffix]?) {
 			root.next[suffix].values += [val];
 		} else {
-			root.next += (suffix : Node([val], ()));
+			root.next += (suffix : Node([val], (), ()));
 		}
 	} else {
 		if (!root.next[suffix]?) {
-			root.next += (suffix : Node([], ()));
+			root.next += (suffix : Node([], (), ()));
 		}
 		root.next[suffix] = put(root.next[suffix], remainder, val);
 	}
 	return root;
 }
+
+public Node removeLinearBranches(Node \node) {
+	for (n <- \node.next) {
+		if (isUnbranched(\node.next[n])) {
+			\node.next = delete(\node.next, n);
+		}
+	}
+	return \node;
+}
+
+private bool isUnbranched(Node root) {
+	switch (<size(root.values), size(root.next)>) {
+		case <1, 0> : return true;
+		case <0, 1> : return isUnbranched(getOneFrom(range(root.next)));
+		default : return false;
+	}
+}
+
+public Node removeSmallClones(Node root, int threshold) {
+	return root;
+}
+
 
 public void visualizeSuffixTree(Node root) {
 	int nodeId = 0;
@@ -61,6 +85,6 @@ public void visualizeSuffixTree(Node root) {
 
 	renderNode(root);
 
-//	renderSave(graph(nodes, edges, hint("layered"), gap(20)), |file:///Users/nico/Desktop/suffix-tree.png|);
+	//renderSave(graph(nodes, edges, hint("layered"), gap(20)), |file:///Users/nico/Desktop/suffix-tree.png|);
 	render(graph(nodes, edges, hint("layered"), gap(20)));
 }
