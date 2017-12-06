@@ -20,7 +20,7 @@ public Node detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, i
 	Node root = Node([], ());
 	visit (asts) {
 		case \method(_, name, _, _, body) : {
-			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
+			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicates")) {
 			//if (linesIn(body) >= duplicationThreshold) {
 				analyzedMethods += 1;
 				str fileName = body.src.path;
@@ -28,9 +28,7 @@ public Node detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, i
 				root = analyze(root, split("/", fileName)[4], content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
 			}
 		}
-	}
-	//text(root);
-	//visualizeSuffixTree(root);
+	}	
 	return root;
 }
 

@@ -40,7 +40,7 @@ public void visualizeSuffixTree(Node root) {
 
 	Figure createNode(Node root, str val) {
 		if (size(root.values) > 0) {
-			return box(text("<val>\n<intercalate("\n", root.values)>"), vis::Figure::id("<translation[root]>"), gap(8));
+			return box(text("<val>\n\n<intercalate("\n", root.values)>"), vis::Figure::id("<translation[root]>"), gap(8));
 		} else {
 			return box(text("<val>"), vis::Figure::id("<translation[root]>"), gap(8));
 		}
@@ -61,5 +61,6 @@ public void visualizeSuffixTree(Node root) {
 
 	renderNode(root);
 
+//	renderSave(graph(nodes, edges, hint("layered"), gap(20)), |file:///Users/nico/Desktop/suffix-tree.png|);
 	render(graph(nodes, edges, hint("layered"), gap(20)));
 }
