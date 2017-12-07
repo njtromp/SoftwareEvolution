@@ -1,6 +1,8 @@
 module Session2
 
 import IO;
+import Map;
+import Set;
 import List;
 import String;
 import util::FileSystem;
@@ -17,11 +19,15 @@ public void main(loc project, int duplicationThreshold = 6) {
 
 	print("Loading files");
 	map[str,list[str]] files = ();
+	map[str, int] slocPerFile = ();
 	for (f <- find(project, "java")) {
-		files += (f.path : removeSingleLineComments(removeMultiLineComments(readFileLines(f))));
+		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
+		slocPerFile += (f.path : size(removeEmptyLines(lines)));
+		files += (f.path : lines);
 	}
+	println("\nLines of code: <sum(range(slocPerFile))>");
 
-	print("\nLoading AST");
+	print("Loading AST");
 	ast = createAstsFromEclipseProject(project, true);
 
 	print("\nDetecting Type-I clones");

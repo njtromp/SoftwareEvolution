@@ -10,7 +10,7 @@ import util::SuffixTree;
 import duplication::TypeOne;
 
 public alias Fragment = list[str];
-public data CloneClass = CloneClass(Fragment fragment, list[SourceInfo] sources);
+public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	//text(tree.root);
@@ -34,8 +34,9 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 
 	//text(cloneClasses);
 	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, cloneClasses);
+	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]));
 	println("\nFound <size(cloneClasses)> clone classes.");
-	println("Number of lines in total <sum([ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])>");
+	println("Duplicates lines <sum([0] + [ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])>");
 	
 	return cloneClasses;
 }
@@ -46,7 +47,7 @@ private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level
 		if (size(\node.next[line].values) > 1) {
 			// line is the key for a leaf
 			if (level >= threshold) {
-				cloneClasses += CloneClass(fragment + line, cast(\node.next[line].values));
+				cloneClasses += CloneClass(cast(\node.next[line].values), fragment + line);
 			}
 		} else {
 			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);

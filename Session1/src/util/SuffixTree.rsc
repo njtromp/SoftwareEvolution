@@ -23,12 +23,9 @@ public SuffixTree put(SuffixTree tree, list[&K] suffixes, &V val) {
 		remainder = tail(suffixes);
 		if (isEmpty(remainder)) {
 			// We are at the end of the suffix.
-			// Is this en exising leaf?
 			if (\node.next[suffix]?) {
-				// YES, existing leaf
 				\node.next[suffix].values = val + \node.next[suffix].values;
 			} else {
-				// NO, new leaf
 				\node.next += (suffix : Node([val], ()));
 			}
 		} else {
