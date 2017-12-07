@@ -7,42 +7,83 @@ import List;
 import String;
 import util::ValueUI;
 import util::SuffixTree;
+import duplication::TypeOne;
 
-public void detectCloneClasses(Node root, int threshold) {
-	//text(root);
-	//visualizeSuffixTree(root);
+public alias Fragment = list[str];
+public data CloneClass = CloneClass(Fragment fragment, list[SourceInfo] sources);
+
+public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
+	//text(tree.root);
+	//visualizeSuffixTree(tree);
 
 	print(".");
-	root = removeLinearBranches(root);
-	print("\b+");
+	tree = removeLinearBranches(tree);
+	print("\b*");
 
-	//text(root);
-	//visualizeSuffixTree(root);
+	//text(tree.root);
+	//visualizeSuffixTree(tree);
 
-	list[str] empty = [];
 	print(".");
-	detect(root, 1, threshold, false, empty);
-	print("\b+");
+	Fragment emptyFragment = [];
+	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
+	print("\b*");
+	
+	print(".");
+	cloneClasses = subsumption(cloneClasses);
+	print("\b*");
 
-	println("\nNr of Clones: <numberOfClones(root)>");
+	//text(cloneClasses);
+	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, cloneClasses);
+	println("\nFound <size(cloneClasses)> clone classes.");
+	println("Number of lines in total <sum([ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])>");
+	
+	return cloneClasses;
 }
 
-private bool detect(Node \node, int threshold, int level, bool bla, list[&K] fragment) {
-	bool cloneDetected = false;
-	//for (key <- \node.next) {
-	//	if (!detect(\node.next[key], threshold, level+1, bla, fragment + key) && level >= threshold && size(\node.values) > 1) {
-	//		cloneDetected = true;
-	//		//println(fragment);
-	//	}
-	//}
-	return cloneDetected;
-}
-
-private int numberOfClones(Node \node) {
-	int clones = 0;
-	for (suffix <- \node.next) {
-		clones += numberOfClones(\node.next[suffix]);
+private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level, Fragment fragment) {
+	list[CloneClass] cloneClasses = [];
+	for (str line <- \node.next) {
+		if (size(\node.next[line].values) > 1) {
+			// line is the key for a leaf
+			if (level >= threshold) {
+				cloneClasses += CloneClass(fragment + line, cast(\node.next[line].values));
+			}
+		} else {
+			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);
+		}
 	}
-	//return clones > 1 ? clones + size(\node.values) : size(\node.values);
-	return clones + size(\node.values);
+	return cloneClasses;
+}
+
+private data CloneInfo = CloneInfo(str source, int end);
+private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
+	set[CloneInfo] convertToCloneInfo(CloneClass cloneClass) {
+		return {CloneInfo(src, end) | SourceInfo(src, _, end) <- cloneClass.sources};
+	}
+	map[set[CloneInfo], CloneClass] subsumptions = ();
+
+	for (cloneClass <- cloneClasses) {
+		cloneInfo = convertToCloneInfo(cloneClass);
+		if (subsumptions[cloneInfo]?) {
+			if (cloneClass.sources[0].begin < subsumptions[cloneInfo].sources[0].begin) {
+				subsumptions[cloneInfo] = cloneClass; 
+			}
+		} else {
+			subsumptions += (cloneInfo : cloneClass);
+		}
+	} 
+	return toList(range(subsumptions));
+}
+
+// Ugly code to cast list[SouceInfo] to list[SourceInfo]!
+private list[SourceInfo] cast(list[value] lst) {
+	list[SourceInfo] sources = [];
+	for (v <- lst) {
+		switch (v) {
+			case SourceInfo(source, begin, end) : {
+				sources += [SourceInfo(source, begin, end)];
+			}
+		}
+	}
+	return sources;
 }
