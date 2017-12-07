@@ -5,6 +5,7 @@ import Map;
 import Set;
 import List;
 import String;
+import vis::Render;
 import util::ValueUI;
 import util::SuffixTree;
 import duplication::TypeOne;
@@ -13,15 +14,19 @@ public alias Fragment = list[str];
 public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
+	// Just for debugging purposes!
 	//text(tree.root);
-	//visualizeSuffixTree(tree);
+	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
+	//render(visualizeSuffixTree(tree));
 
 	print(".");
 	tree = removeLinearBranches(tree);
 	print("\b*");
 
+	// Just for debugging purposes!
 	//text(tree.root);
-	//visualizeSuffixTree(tree);
+	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
+	//render(visualizeSuffixTree(tree));
 
 	print(".");
 	Fragment emptyFragment = [];
@@ -32,11 +37,12 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	cloneClasses = subsumption(cloneClasses);
 	print("\b*");
 
+	// Just for debugging purposes!
 	//text(cloneClasses);
-	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, cloneClasses);
-	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]));
+	// Should be moved to Session2!
+	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, toString(cloneClasses));
 	println("\nFound <size(cloneClasses)> clone classes.");
-	println("Duplicates lines <sum([0] + [ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])>");
+	println("Containing <sum([0] + [ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])> lines.");
 	
 	return cloneClasses;
 }
@@ -87,4 +93,8 @@ private list[SourceInfo] cast(list[value] lst) {
 		}
 	}
 	return sources;
+}
+
+private str toString(list[CloneClass] cloneClasses) {
+	return intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]);
 }

@@ -22,7 +22,8 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 	visit (asts) {
 		case \method(_, name, _, _, body) : {
 			print("\b<stringChar(charAt("|/-\\", analyzedMethods % 4))>");
-			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicates")) {
+			// Just for debugging puroses
+			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
 			//if (linesIn(body) >= duplicationThreshold) {
 				analyzedMethods += 1;
 				str fileName = body.src.path;

@@ -4,7 +4,6 @@ import Map;
 import Set;
 import List;
 import vis::Figure;
-import vis::Render;
 
 public data Node = Node(list[&V] values, map[&V, Node] next);
 public data SuffixTree = SuffixTree(Node root);
@@ -64,7 +63,7 @@ private bool isUnbranched(Node root) {
 	}
 }
 
-public void visualizeSuffixTree(SuffixTree tree) {
+public Figure visualizeSuffixTree(SuffixTree tree) {
 	int nodeId = 0;
 	list[Edge] edges = [];
 	list[Figure] nodes = [];
@@ -102,6 +101,5 @@ public void visualizeSuffixTree(SuffixTree tree) {
 
 	renderNode(tree.root);
 	
-	//renderSave(graph(nodes, edges, hint("layered"), gap(20)), |file:///Users/nico/Desktop/suffix-tree.png|);
-	render(graph(nodes, edges, hint("layered"), gap(20)));
+	return graph(nodes, edges, hint("layered"), gap(20));
 }
