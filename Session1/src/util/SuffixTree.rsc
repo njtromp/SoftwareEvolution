@@ -16,16 +16,19 @@ public SuffixTree getNewSuffixTree() {
 public SuffixTree startNewSuffix(SuffixTree tree) {
 	return tree;
 }
- 
+
 public SuffixTree put(SuffixTree tree, list[&K] suffixes, &V val) {
 	Node put(Node \node, list[&K] suffixes, &V val) {
 		suffix = head(suffixes);
 		remainder = tail(suffixes);
 		if (isEmpty(remainder)) {
-			// At the end of the suffix.
+			// We are at the end of the suffix.
+			// Is this en exising leaf?
 			if (\node.next[suffix]?) {
+				// YES, existing leaf
 				\node.next[suffix].values = val + \node.next[suffix].values;
 			} else {
+				// NO, new leaf
 				\node.next += (suffix : Node([val], ()));
 			}
 		} else {
@@ -101,7 +104,7 @@ public void visualizeSuffixTree(SuffixTree tree) {
 	nodes += createNode(tree.root, "root");
 
 	renderNode(tree.root);
-
+	
 	//renderSave(graph(nodes, edges, hint("layered"), gap(20)), |file:///Users/nico/Desktop/suffix-tree.png|);
 	render(graph(nodes, edges, hint("layered"), gap(20)));
 }
