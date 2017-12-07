@@ -12,40 +12,70 @@ import duplication::TypeOne;
 public alias Fragment = list[str];
 public data CloneClass = CloneClass(Fragment fragment, list[SourceInfo] sources);
 
-public void detectCloneClasses(SuffixTree tree, int threshold) {
+public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	//text(tree.root);
 	//visualizeSuffixTree(tree);
 
 	print(".");
 	tree = removeLinearBranches(tree);
-	print("\b+");
+	print("\b*");
 
 	//text(tree.root);
-	visualizeSuffixTree(tree);
+	//visualizeSuffixTree(tree);
 
 	print(".");
 	Fragment emptyFragment = [];
-	cloneClasses = detectCloneClasses(tree.root, threshold, 0, emptyFragment);
-	text(cloneClasses);
-	print("\b+");
+	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
+	print("\b*");
+	
+	print(".");
+	cloneClasses = subsumption(cloneClasses);
+	print("\b*");
 
+	//text(cloneClasses);
+	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, cloneClasses);
+	println("\nFound <size(cloneClasses)> clone classes.");
+	println("Number of lines in total <sum([ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])>");
+	
+	return cloneClasses;
 }
 
 private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level, Fragment fragment) {
 	list[CloneClass] cloneClasses = [];
-	for (str k <- \node.next) {
-		if (size(\node.next[k].values) > 1) {
-			// k points to a leaf
+	for (str line <- \node.next) {
+		if (size(\node.next[line].values) > 1) {
+			// line is the key for a leaf
 			if (level >= threshold) {
-				cloneClasses += CloneClass(fragment + k, cast(\node.next[k].values));
+				cloneClasses += CloneClass(fragment + line, cast(\node.next[line].values));
 			}
 		} else {
-			cloneClasses += detectCloneClasses(\node.next[k], level + 1, threshold, fragment + k);
+			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);
 		}
 	}
 	return cloneClasses;
 }
 
+private data CloneInfo = CloneInfo(str source, int end);
+private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
+	set[CloneInfo] convertToCloneInfo(CloneClass cloneClass) {
+		return {CloneInfo(src, end) | SourceInfo(src, _, end) <- cloneClass.sources};
+	}
+	map[set[CloneInfo], CloneClass] subsumptions = ();
+
+	for (cloneClass <- cloneClasses) {
+		cloneInfo = convertToCloneInfo(cloneClass);
+		if (subsumptions[cloneInfo]?) {
+			if (cloneClass.sources[0].begin < subsumptions[cloneInfo].sources[0].begin) {
+				subsumptions[cloneInfo] = cloneClass; 
+			}
+		} else {
+			subsumptions += (cloneInfo : cloneClass);
+		}
+	} 
+	return toList(range(subsumptions));
+}
+
+// Ugly code to cast list[SouceInfo] to list[SourceInfo]!
 private list[SourceInfo] cast(list[value] lst) {
 	list[SourceInfo] sources = [];
 	for (v <- lst) {
