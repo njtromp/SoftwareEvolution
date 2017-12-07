@@ -13,7 +13,7 @@ import util::StringCleaner;
 
 private int analyzedMethods;
 
-public data CloneInfo = CloneInfo(str fileName, int begin, int end);
+public data SourceInfo = SourceInfo(str fileName, int begin, int end);
 
 public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
 	analyzedMethods = 0;
@@ -46,7 +46,7 @@ private SuffixTree analyze(SuffixTree tree, str fileName, list[str] lines, int c
 		line = trim(lines[i]);
 		if (!isEmpty(line)) {
 			suffix = line + suffix;
-			tree = put(tree, suffix, CloneInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1));
+			tree = put(tree, suffix, SourceInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1));
 		}
 	}
 	return tree;
