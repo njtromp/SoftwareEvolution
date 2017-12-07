@@ -19,28 +19,32 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
 	//render(visualizeSuffixTree(tree));
 
-	print(".");
+	print("3");
 	tree = removeLinearBranches(tree);
-	print("\b*");
+	print("\b");
+	
+	print("2");
+	tree = removeShortBranches(tree, threshold);
+	print("\b");
 
 	// Just for debugging purposes!
 	//text(tree.root);
 	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
-	//render(visualizeSuffixTree(tree));
+	render(visualizeSuffixTree(tree));
 
-	print(".");
+	print("1");
 	Fragment emptyFragment = [];
 	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
-	print("\b*");
+	print("\b");
 	
-	print(".");
+	print("0");
 	cloneClasses = subsumption(cloneClasses);
-	print("\b*");
+	print("\b ");
 
 	// Just for debugging purposes!
 	//text(cloneClasses);
 	// Should be moved to Session2!
-	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, toString(cloneClasses));
+	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, duplication::CloneClasses::toString(cloneClasses));
 	println("\nFound <size(cloneClasses)> clone classes.");
 	println("Containing <sum([0] + [ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])> lines.");
 	

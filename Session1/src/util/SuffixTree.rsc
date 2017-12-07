@@ -55,11 +55,42 @@ public Node removeLinearBranches(Node \node) {
 	return \node;
 }
 
-private bool isUnbranched(Node root) {
-	switch (<size(root.values), size(root.next)>) {
+private bool isUnbranched(Node \node) {
+	switch (<size(\node.values), size(\node.next)>) {
 		case <1, 0> : return true;
-		case <0, 1> : return isUnbranched(getOneFrom(range(root.next)));
+		case <0, 1> : return isUnbranched(getOneFrom(range(\node.next)));
 		default : return false;
+	}
+}
+
+public SuffixTree removeShortBranches(SuffixTree tree, int threshold) {
+	tree.root = removeShortBranches(tree.root, threshold, 1);
+	return tree;
+}
+
+public Node removeShortBranches(Node \node, int threshold, int level) {
+	for (n <- \node.next) {
+		if (isShortBranch(\node.next[n], threshold, level + 1)) {
+			\node.next = delete(\node.next, n);
+		}
+	}
+	return \node;
+}
+
+private bool isShortBranch(Node \node, int threshold, int level) {
+	if (level >= threshold) {
+		return false;
+	} else {
+		if (size(\node.values) > 0 || size(\node.next) == 0) {
+			return true;
+		} else {
+			for (key <- \node.next) {
+				if (!isShortBranch(\node.next[key], threshold, level + 1)) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 }
 
