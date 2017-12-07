@@ -83,10 +83,10 @@ public void visualizeSuffixTree(SuffixTree tree) {
 	Figure createNode(Node \node, str val) {
 		registerNode(\node);
 		if (size(\node.values) > 0) {
-			return box(text("<val>\n\n<intercalate("\n", \node.values)>"), vis::Figure::id("<translation[\node]>"), gap(8));
-		} else {
-			return box(text("<val>"), vis::Figure::id("<translation[\node]>"), gap(8));
+			edges += edge("<translation[\node]>", "-<translation[\node]>", toArrow(triangle(5, fillColor("black"))));
+			nodes += box(text("<intercalate("\n", \node.values)>"), vis::Figure::id("-<translation[\node]>"), gap(8));
 		}
+		return box(text("<val>"), vis::Figure::id("<translation[\node]>"), gap(8));
 	}
 
 	void renderNode(Node \node) {
