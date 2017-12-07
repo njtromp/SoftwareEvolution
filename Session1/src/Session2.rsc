@@ -25,7 +25,7 @@ public void main(loc project, int duplicationThreshold = 6) {
 	ast = createAstsFromEclipseProject(project, true);
 
 	print("\nDetecting Type-I clones");
-	Node typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
+	SuffixTree typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedMethodsCount()> methods");
 	print("Detecting clone-classes");
 	detectCloneClasses(typeOneClones, duplicationThreshold);
