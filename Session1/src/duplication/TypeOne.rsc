@@ -22,7 +22,7 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 
 	void analyze(Statement body) {
 		print("\b<stringChar(charAt("|/-\\", analyzedMethods % 4))>");
-		// Just for debugging puroses
+		// Just for debugging purposes
 		//if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
 		if (linesIn(body) >= duplicationThreshold) {
 			analyzedMethods += 1;
@@ -33,10 +33,11 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 	}
 
 	visit (asts) {
-		case \initializer(body) : analyze(body);
+		case \initializer(body)          : analyze(body);
 		case \constructor(_, _, _, body) : analyze(body);
-		case \method(_, _, _, _, body) : analyze(body);
+		case \method(_, _, _, _, body)   : analyze(body);
 	}	
+	
 	print("\b.");
 	return tree;
 }
