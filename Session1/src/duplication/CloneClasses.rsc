@@ -19,34 +19,34 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
 	//render(visualizeSuffixTree(tree));
 
-	print("3");
+	print("+");
 	tree = removeLinearBranches(tree);
-	print("\b");
+	print("\b.");
 	
-	print("2");
+	print("+");
 	tree = removeShortBranches(tree, threshold);
-	print("\b");
+	print("\b.");
 
 	// Just for debugging purposes!
 	//text(tree.root);
 	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
-	render(visualizeSuffixTree(tree));
+	//render(visualizeSuffixTree(tree));
 
-	print("1");
+	print("+");
 	Fragment emptyFragment = [];
 	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
-	print("\b");
+	print("\b.");
 	
-	print("0");
+	print("+");
 	cloneClasses = subsumption(cloneClasses);
-	print("\b ");
+	print("\b.");
 
 	// Just for debugging purposes!
 	//text(cloneClasses);
 	// Should be moved to Session2!
 	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, duplication::CloneClasses::toString(cloneClasses));
 	println("\nFound <size(cloneClasses)> clone classes.");
-	println("Containing <sum([0] + [ss.end - ss.begin + 1 | cc <- cloneClasses, ss <- cc.sources])> lines.");
+	println("Containing <sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses])> lines.");
 	
 	return cloneClasses;
 }
@@ -55,15 +55,37 @@ private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level
 	list[CloneClass] cloneClasses = [];
 	for (str line <- \node.next) {
 		if (size(\node.next[line].values) > 1) {
-			// line is the key for a leaf
 			if (level >= threshold) {
 				cloneClasses += CloneClass(cast(\node.next[line].values), fragment + line);
 			}
 		} else {
+			if (level > threshold && size(\node.next) > 1) {
+				list[SourceInfo] singleSources = [];
+				for (n <- \node.next) {
+					singleSources += findSingleSources(\node.next[n]);
+				}
+				if (size(singleSources) > 1) {
+					cloneClasses += CloneClass(singleSources, fragment);
+				}
+			}
 			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);
 		}
 	}
 	return cloneClasses;
+}
+
+private list[SourceInfo] findSingleSources(Node \node) {
+	if (size(\node.values) > 1) {
+		return [];
+	} else if (size(\node.values) == 1) {
+		return cast(\node.values);
+	} else {
+		list[SourceInfo] singleSources = [];
+		for (n <- \node.next) {
+			singleSources += findSingleSources(\node.next[n]);
+		}
+		return singleSources;
+	} 
 }
 
 private data CloneInfo = CloneInfo(str source, int end);
