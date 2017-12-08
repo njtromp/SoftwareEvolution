@@ -19,13 +19,13 @@ public void main(loc project, int duplicationThreshold = 6) {
 
 	print("Loading files");
 	map[str,list[str]] files = ();
-	map[str, int] slocPerFile = ();
+	int sloc = 0;
 	for (f <- find(project, "java")) {
 		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
-		slocPerFile += (f.path : size(removeEmptyLines(lines)));
+		sloc += size(removeEmptyLines(lines));
 		files += (f.path : lines);
 	}
-	println(".\nLines of code: <sum(range(slocPerFile))>.");
+	println(".\nLines of code: <sloc>.");
 
 	print("Loading AST");
 	ast = createAstsFromEclipseProject(project, true);
