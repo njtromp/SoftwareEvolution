@@ -19,20 +19,25 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 	analyzedMethods = 0;
 	SuffixTree tree = getNewSuffixTree();
 	print(".");
-	visit (asts) {
-		case \method(_, name, _, _, body) : {
-			print("\b<stringChar(charAt("|/-\\", analyzedMethods % 4))>");
-			// Just for debugging puroses
-			if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
-			//if (linesIn(body) >= duplicationThreshold) {
-				analyzedMethods += 1;
-				str fileName = body.src.path;
-				content = files[fileName];
-				tree = analyze(tree, split("/", fileName)[4], content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
-			}
+
+	void analyze(Statement body) {
+		print("\b<stringChar(charAt("|/-\\", analyzedMethods % 4))>");
+		// Just for debugging puroses
+		//if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "Duplicate")) {
+		if (linesIn(body) >= duplicationThreshold) {
+			analyzedMethods += 1;
+			str fileName = body.src.path;
+			content = files[fileName];
+			tree = analyze(tree, split("/", fileName)[4], content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
 		}
+	}
+
+	visit (asts) {
+		case \initializer(body) : analyze(body);
+		case \constructor(_, _, _, body) : analyze(body);
+		case \method(_, _, _, _, body) : analyze(body);
 	}	
-	print("\b ");
+	print("\b.");
 	return tree;
 }
 

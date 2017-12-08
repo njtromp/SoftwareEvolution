@@ -25,14 +25,14 @@ public void main(loc project, int duplicationThreshold = 6) {
 		slocPerFile += (f.path : size(removeEmptyLines(lines)));
 		files += (f.path : lines);
 	}
-	println("\nLines of code: <sum(range(slocPerFile))>");
+	println(".\nLines of code: <sum(range(slocPerFile))>.");
 
 	print("Loading AST");
 	ast = createAstsFromEclipseProject(project, true);
 
-	print("\nDetecting Type-I clones");
+	print(".\nDetecting Type-I clones");
 	SuffixTree typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
-	println("\nAnalyzed <getAnalyzedMethodsCount()> methods");
+	println("\nAnalyzed <getAnalyzedMethodsCount()> methods.");
 	print("Detecting clone-classes");
 	detectCloneClasses(typeOneClones, duplicationThreshold);
 
