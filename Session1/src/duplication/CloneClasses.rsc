@@ -44,7 +44,8 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	// Just for debugging purposes!
 	//text(cloneClasses);
 	// Should be moved to Session2!
-	writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, duplication::CloneClasses::toString(cloneClasses));
+	//writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, duplication::CloneClasses::toString(cloneClasses));
+
 	println("\nFound <size(cloneClasses)> clone classes.");
 	println("Containing <sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses])> lines.");
 	
@@ -55,19 +56,26 @@ private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level
 	list[CloneClass] cloneClasses = [];
 	for (str line <- \node.next) {
 		if (size(\node.next[line].values) > 1) {
-			if (level >= threshold) {
+			// We are at a leaf
+			if (level >= threshold) { // Past the threshold?
+				// This is a clone class
 				cloneClasses += CloneClass(cast(\node.next[line].values), fragment + line);
 			}
 		} else {
+			// We are some where in a branch
 			if (level > threshold && size(\node.next) > 1) {
+				// We are at a split, if there are any branches leading to a single leaf
+				// we can group them together.
 				list[SourceInfo] singleSources = [];
 				for (n <- \node.next) {
 					singleSources += findSingleSources(\node.next[n]);
 				}
+				// Any multi leaf branches are already part of a clone class
 				if (size(singleSources) > 1) {
 					cloneClasses += CloneClass(singleSources, fragment);
 				}
 			}
+			// Check any branches further down the tree
 			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);
 		}
 	}
@@ -88,17 +96,21 @@ private list[SourceInfo] findSingleSources(Node \node) {
 	} 
 }
 
+// Used to find overlapping classes. Overlapping classes are defined
+// by the file they apear in and the last line of the block.
 private data CloneInfo = CloneInfo(str source, int end);
 private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
+
 	set[CloneInfo] convertToCloneInfo(CloneClass cloneClass) {
 		return {CloneInfo(src, end) | SourceInfo(src, _, end) <- cloneClass.sources};
 	}
+
 	map[set[CloneInfo], CloneClass] subsumptions = ();
 
 	for (cloneClass <- cloneClasses) {
 		cloneInfo = convertToCloneInfo(cloneClass);
 		if (subsumptions[cloneInfo]?) {
-			if (cloneClass.sources[0].begin < subsumptions[cloneInfo].sources[0].begin) {
+			if (contains(cloneClass.sources, subsumptions[cloneInfo].sources)) {
 				subsumptions[cloneInfo] = cloneClass; 
 			}
 		} else {
@@ -108,7 +120,15 @@ private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
 	return toList(range(subsumptions));
 }
 
+// The current implementation is very greedy, it only check for the first entry of a list.
+// When the list are sorted if should be oke, since this method is only called when there
+// is a match as a map key. 
+private bool contains(list[SourceInfo] candidate, list[SourceInfo] current) {
+	return candidate[0].begin < current[0].begin;
+}
+
 // Ugly code to cast list[SouceInfo] to list[SourceInfo]!
+// Need to find the proper way in Rascal aka make the Suffix tree more type aware...
 private list[SourceInfo] cast(list[value] lst) {
 	list[SourceInfo] sources = [];
 	for (v <- lst) {
@@ -118,7 +138,7 @@ private list[SourceInfo] cast(list[value] lst) {
 			}
 		}
 	}
-	return sources;
+	return sort(sources);
 }
 
 private str toString(list[CloneClass] cloneClasses) {

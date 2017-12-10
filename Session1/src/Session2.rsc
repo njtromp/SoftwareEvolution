@@ -32,9 +32,9 @@ public void main(loc project, int duplicationThreshold = 6) {
 
 	print(".\nDetecting Type-I clones");
 	SuffixTree typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
-	println("\nAnalyzed <getAnalyzedMethodsCount()> methods.");
+	println("\nAnalyzed <getAnalyzedBlocksCount()> blocks.");
 	print("Detecting clone-classes");
-	detectCloneClasses(typeOneClones, duplicationThreshold);
-
+	cloneClasses = detectCloneClasses(typeOneClones, duplicationThreshold);
+	
 	println("\nDone");
 }

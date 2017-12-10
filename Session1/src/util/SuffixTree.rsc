@@ -8,14 +8,6 @@ import vis::Figure;
 public data Node = Node(list[&V] values, map[&V, Node] next);
 public data SuffixTree = SuffixTree(Node root);
 
-public SuffixTree getNewSuffixTree() {
-	return SuffixTree(Node([], ()));	
-}
-
-public SuffixTree startNewSuffix(SuffixTree tree) {
-	return tree;
-}
-
 public SuffixTree put(SuffixTree tree, list[&K] suffixes, &V val) {
 	Node put(Node \node, list[&K] suffixes, &V val) {
 		suffix = head(suffixes);
