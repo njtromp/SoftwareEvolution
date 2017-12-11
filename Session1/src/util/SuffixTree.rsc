@@ -15,8 +15,10 @@ public SuffixTree put(SuffixTree tree, list[&K] suffixes, &V val) {
 		if (isEmpty(remainder)) {
 			// We are at the end of the suffix.
 			if (\node.next[suffix]?) {
+				// Add occurence to the existing leaf
 				\node.next[suffix].values = val + \node.next[suffix].values;
 			} else {
+				// Add a new node and register the occurence
 				\node.next += (suffix : Node([val], ()));
 			}
 		} else {
@@ -34,17 +36,12 @@ public SuffixTree put(SuffixTree tree, list[&K] suffixes, &V val) {
 }
 
 public SuffixTree removeLinearBranches(SuffixTree tree) {
-	tree.root = removeLinearBranches(tree.root);
-	return tree;
-}
-
-public Node removeLinearBranches(Node \node) {
-	for (n <- \node.next) {
-		if (isUnbranched(\node.next[n])) {
-			\node.next = delete(\node.next, n);
+	for (n <- tree.root.next) {
+		if (isUnbranched(tree.root.next[n])) {
+			tree.root.next = delete(tree.root.next, n);
 		}
 	}
-	return \node;
+	return tree;
 }
 
 private bool isUnbranched(Node \node) {
@@ -60,24 +57,24 @@ public SuffixTree removeShortBranches(SuffixTree tree, int threshold) {
 	return tree;
 }
 
-public Node removeShortBranches(Node \node, int threshold, int level) {
+private Node removeShortBranches(Node \node, int threshold, int depth) {
 	for (n <- \node.next) {
-		if (isShortBranch(\node.next[n], threshold, level + 1)) {
+		if (isShortBranch(\node.next[n], threshold, depth + 1)) {
 			\node.next = delete(\node.next, n);
 		}
 	}
 	return \node;
 }
 
-private bool isShortBranch(Node \node, int threshold, int level) {
-	if (level >= threshold) {
+private bool isShortBranch(Node \node, int threshold, int depth) {
+	if (depth >= threshold) {
 		return false;
 	} else {
 		if (size(\node.values) > 0 || size(\node.next) == 0) {
 			return true;
 		} else {
 			for (key <- \node.next) {
-				if (!isShortBranch(\node.next[key], threshold, level + 1)) {
+				if (!isShortBranch(\node.next[key], threshold, depth + 1)) {
 					return false;
 				}
 			}

@@ -5,6 +5,7 @@ import Map;
 import Set;
 import List;
 import String;
+import util::Math;
 import util::FileSystem;
 import lang::java::jdt::m3::AST;
 import util::StringCleaner;
@@ -12,7 +13,7 @@ import util::SuffixTree;
 import duplication::TypeOne;
 import duplication::CloneClasses;
 
-public void main(loc project, int duplicationThreshold = 6) {
+public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |file:///Users/nico/Desktop/clone-classes.txt| ) {
 	println("======================");
 	println("Nico Tromp & Rob Kunst");
 	println("----------------------");
@@ -33,8 +34,21 @@ public void main(loc project, int duplicationThreshold = 6) {
 	print(".\nDetecting Type-I clones");
 	SuffixTree typeOneClones = detectTypeIClones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedBlocksCount()> blocks.");
+
 	print("Detecting clone-classes");
-	cloneClasses = detectCloneClasses(typeOneClones, duplicationThreshold);
+	list[CloneClass] cloneClasses = detectCloneClasses(typeOneClones, duplicationThreshold);
+	int clonedLines = sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses]);
+	println("\nFound <size(cloneClasses)> clone classes.");
+	println("Containing <clonedLines> lines (<round(1000.0*clonedLines/sloc)/10.0>%).");
+	println("-----------------------------------------------------------------");
+	println("Biggest (occur) clone class:\n<duplication::CloneClasses::toString([head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.sources) > size(cl2.sources);}))])>");
+	println("-----------------------------------------------------------------");
+	println("Biggest (files) clone class:\n<duplication::CloneClasses::toString([head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size({s.fileName | s <- cl1.sources}) > size({s.fileName | s <- cl2.sources});}))])>");
+	println("-----------------------------------------------------------------");
+	println("Biggest (lines) clone class:\n<duplication::CloneClasses::toString([head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.fragment) > size(cl2.fragment);}))])>");
+	println("-----------------------------------------------------------------");
+
+	writeFile(cloneClassFile, duplication::CloneClasses::toString(cloneClasses));
 	
-	println("\nDone");
+	println("Done");
 }

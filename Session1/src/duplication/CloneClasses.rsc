@@ -16,14 +16,14 @@ public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment)
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	// Just for debugging purposes!
 	//text(tree.root);
-	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
+	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree-raw.png|);
 	//render(visualizeSuffixTree(tree));
 
-	print("+");
+	print("\>");
 	tree = removeLinearBranches(tree);
 	print("\b.");
 	
-	print("+");
+	print("\>");
 	tree = removeShortBranches(tree, threshold);
 	print("\b.");
 
@@ -32,52 +32,40 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
 	//render(visualizeSuffixTree(tree));
 
-	print("+");
+	print("\>");
 	Fragment emptyFragment = [];
 	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
 	print("\b.");
 	
-	print("+");
+	print("\>");
 	cloneClasses = subsumption(cloneClasses);
 	print("\b.");
-
-	// Just for debugging purposes!
-	//text(cloneClasses);
-	// Should be moved to Session2!
-	//writeFile(|file:///Users/nico/Desktop/clone-classes.txt|, duplication::CloneClasses::toString(cloneClasses));
-
-	println("\nFound <size(cloneClasses)> clone classes.");
-	println("Containing <sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses])> lines.");
 	
 	return cloneClasses;
 }
 
-private list[CloneClass] detectCloneClasses(Node \node, int threshold, int level, Fragment fragment) {
+private list[CloneClass] detectCloneClasses(Node \node, int threshold, int depth, Fragment fragment) {
 	list[CloneClass] cloneClasses = [];
 	for (str line <- \node.next) {
-		if (size(\node.next[line].values) > 1) {
-			// We are at a leaf
-			if (level >= threshold) { // Past the threshold?
-				// This is a clone class
-				cloneClasses += CloneClass(cast(\node.next[line].values), fragment + line);
-			}
-		} else {
-			// We are some where in a branch
-			if (level > threshold && size(\node.next) > 1) {
-				// We are at a split, if there are any branches leading to a single leaf
-				// we can group them together.
-				list[SourceInfo] singleSources = [];
-				for (n <- \node.next) {
-					singleSources += findSingleSources(\node.next[n]);
-				}
-				// Any multi leaf branches are already part of a clone class
-				if (size(singleSources) > 1) {
-					cloneClasses += CloneClass(singleSources, fragment);
-				}
-			}
-			// Check any branches further down the tree
-			cloneClasses += detectCloneClasses(\node.next[line], threshold, level + 1, fragment + line);
+		if (size(\node.next[line].values) >= 2 && depth >= threshold) {
+			// This is a clone class
+			cloneClasses += CloneClass(cast(\node.next[line].values), fragment + line);
 		}
+		// We are some where in a branch
+		if (depth > threshold && size(\node.next) > 1) {
+			// We are at a split, if there are any branches leading to a single leaf
+			// we can group them together.
+			list[SourceInfo] singleSources = [];
+			for (n <- \node.next) {
+				singleSources += findSingleSources(\node.next[n]);
+			}
+			// Any multi leaf branches are already part of a clone class
+			if (size(singleSources) >= 2) {
+				cloneClasses += CloneClass(singleSources, fragment);
+			}
+		}
+		// Check any branches further down the tree
+		cloneClasses += detectCloneClasses(\node.next[line], threshold, depth + 1, fragment + line);
 	}
 	return cloneClasses;
 }
@@ -141,6 +129,6 @@ private list[SourceInfo] cast(list[value] lst) {
 	return sort(sources);
 }
 
-private str toString(list[CloneClass] cloneClasses) {
+public str toString(list[CloneClass] cloneClasses) {
 	return intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]);
 }

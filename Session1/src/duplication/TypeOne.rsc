@@ -32,6 +32,7 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 
 	// Analyze initialzer, constructors and methods
 	void analyze(Statement body) {
+		//if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "/Duplicates")) {
 		if (linesIn(body) >= duplicationThreshold) {
 			print("\b<stringChar(charAt("|/-\\", analyzedBlocks % 4))>");
 			analyzedBlocks += 1;
@@ -43,6 +44,7 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 
 	visit (asts) {
 		case f:\field(_, list[Expression] fragments) : {
+			//if (linesIn(f) >= duplicationThreshold && contains(f.src.path, "/Duplicates")) {
 			if (linesIn(f) >= duplicationThreshold) {
 				for (fragment <- fragments) analyze(fragment);
 			}
