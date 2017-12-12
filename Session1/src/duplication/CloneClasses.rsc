@@ -40,7 +40,7 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\>");
 	cloneClasses = subsumption(cloneClasses);
 	print("\b.");
-	
+		
 	return cloneClasses;
 }
 

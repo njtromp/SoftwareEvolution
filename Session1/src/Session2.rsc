@@ -5,6 +5,7 @@ import Map;
 import Set;
 import List;
 import String;
+import vis::Render;
 import util::Math;
 import util::FileSystem;
 import lang::java::jdt::m3::AST;
@@ -12,8 +13,9 @@ import util::StringCleaner;
 import util::SuffixTree;
 import duplication::TypeOne;
 import duplication::CloneClasses;
+import duplication::Visualization;
 
-public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |file:///Users/nico/Desktop/clone-classes.txt| ) {
+public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |home:///Desktop/clone-classes.txt| ) {
 	println("======================");
 	println("Nico Tromp & Rob Kunst");
 	println("----------------------");
@@ -49,6 +51,8 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 	println("-----------------------------------------------------------------");
 
 	writeFile(cloneClassFile, duplication::CloneClasses::toString(cloneClasses));
+	
+	render(createVisualization(cloneClasses, files));
 	
 	println("Done");
 }

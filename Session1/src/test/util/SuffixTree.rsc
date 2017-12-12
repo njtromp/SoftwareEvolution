@@ -104,3 +104,17 @@ test bool removeSingleLineBranchesFromSuffixTreeWithBranched() {
 	expected = SuffixTree(Node([], ("1" : Node([], ("2" : Node([1], ()), "3" : Node([2], ()))))));
 	return tree == expected;
 }
+
+// Short branch cleaning tests
+
+test bool removeShortBranch() {
+	SuffixTree tree = SuffixTree(Node([], ()));
+	tree = put(tree, ["1", "2", "3"], 1);
+	tree = put(tree, ["1", "3", "4"], 2);
+	tree = put(tree, ["2", "3"], 3);
+	
+	tree = removeShortBranches(tree, 4);
+	println(tree);
+	expected = SuffixTree(Node([], ("2" : Node([], ("3" : Node([3], ()))))));
+	return tree == expected;
+}
