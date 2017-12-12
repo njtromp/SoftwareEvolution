@@ -11,13 +11,13 @@ import java.io.IOException;
 public class SimpleJava {
 	
 	public void SimpleJava() {
-		int a = 5;
-		
-		if (a == 6) {
-//			System.out.println();
-		} else if(a == 3) {
-			
-		}
+//		int a = 5;
+//		
+//		if (a == 6) {
+////			System.out.println();
+//		} else if(a == 3) {
+//			
+//		}
 		
 	}
 /*	

@@ -12,8 +12,8 @@ import util::StringCleaner;
 
 
 public void play() {
-	//ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
-	ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
+	ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
+	//ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
 	//println(ast.src.path);
 	list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(ast.src)));
 	visit (ast) {
@@ -47,28 +47,22 @@ public void play() {
 		case i:\initializer(Statement initializerBody): {
 			list[str] hashes = hashAST(initializerBody);
 		}
-//		//
-//		// case m:\method(_, name, _, _, b:\block(stmts)) : {
-//		// 	//println("\n<m.src.path>.<name>(): (<b.src.begin.line>, <b.src.end.line>)");
-//		// 	list[str] hashes = hashAST(stmts);
-//		//
-//		// 	println("Hashed tree for method <name>()");
-//		//
-//		// 	// we should now have a list of string hashes that represent the program execution
-//		// 	for (line <- hashes) {
-//		// 		println(line);
-//		// 	}
-//		// }
-//		//
-//
-	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
+
+	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl)): {
+	    		println("hashing method <name>");
+	    		
+			//println("\n<m.src.path>.<name>(): (<b.src.begin.line>, <b.src.end.line>)");
+	    	
+	    		println(hashAST(impl));
+	    		
 			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
 		}
 		
 	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions): {
 			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"];
 		}
-		case c:\constructor(str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
+		
+		case c:\constructor(str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl)): {
 			list[str] hashes = ["constructor-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
 		}
 		//case i:\import(str name): {
@@ -145,6 +139,8 @@ public list[str] hashAST(list[Statement] stmts) {
 	for (stmt <- stmts) {
 		result += hashAST(stmt);
 	}
+
+	println("finished handling list of statements");
 
 	// return a list with all hashes of the statements in the list
 	return result;
@@ -242,7 +238,7 @@ public list[str] hashAST(\if(Expression condition, Statement thenBranch, Stateme
 // \label(str name, Statement body)
 
 public list[str] hashAST(\return(Expression expression)){
-
+	println("handling return");
 	// append return keyword to the intercalated hash of the expression
 	hash = "return" + intercalate("", hashAST(expression));
 
@@ -250,12 +246,14 @@ public list[str] hashAST(\return(Expression expression)){
 }
 
 public list[str] hashAST(\return()){
+	println("handling return");
 	// simply use the return keyword as a hash
 	return ["return"];
 }
 
 
 public list[str] hashAST(\switch(Expression expression, list[Statement] statements)){
+	println("handling switch");
 
 	// use the combined expression and statements as a hash
 	hash = intercalate("", hashAST(expression) + hashAST(statements));
@@ -264,11 +262,14 @@ public list[str] hashAST(\switch(Expression expression, list[Statement] statemen
 }
 
 public list[str] hashAST(\case(Expression expression)){
+	
+	println("handling case");
 	// simply return the hash of the expression and prepend the case keyword
 	return ["case" + intercalate("", hashAST(expression))];
 }
 
 public list[str] hashAST(\defaultCase()){
+	println("handling default case");
 	// simply use the default keyword as a hash
 	return ["default"];
 }
@@ -277,6 +278,7 @@ public list[str] hashAST(\defaultCase()){
 //\throw(Expression expression)
 
 public list[str] hashAST(\try(Statement body, list[Statement] catchClauses)){
+	println("handling try");
 	// return a hash for the try keyword and append the hashes for the body and catchClauses
 	return ["try"] + hashAST(body) + hashAST(catchClauses);
 }
