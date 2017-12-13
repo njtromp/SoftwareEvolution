@@ -16,7 +16,7 @@ import duplication::Type2;
 import duplication::CloneClasses;
 import duplication::Visualization;
 
-public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |home:///Desktop/clone-classes.txt|, bool generateVisuals = true ) {
+public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File = |home:///Desktop/clone-classes-1.txt|, loc cloneClass2File = |home:///Desktop/clone-classes-2.txt|, bool generateVisuals = true ) {
 	println("======================");
 	println("Nico Tromp & Rob Kunst");
 	println("----------------------");
@@ -37,7 +37,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 	print(".\nDetecting Type-1 clones");
 	SuffixTree type1Clones = detectType1Clones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedType1BlocksCount()> blocks.");
-	list[CloneClass] cloneClasses = detectClones(type1Clones, duplicationThreshold, sloc, cloneClassFile);
+	list[CloneClass] cloneClasses = detectClones(type1Clones, duplicationThreshold, sloc, cloneClass1File);
 	if (generateVisuals) {
 		render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
 	}
@@ -45,7 +45,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 	print(".\nDetecting Type-2 clones");
 	SuffixTree type2Clones = detectType2Clones(ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedType2BlocksCount()> blocks.");
-	cloneClasses = detectClones(type2Clones, duplicationThreshold, sloc, cloneClassFile);
+	cloneClasses = detectClones(type2Clones, duplicationThreshold, sloc, cloneClass2File);
 	if (generateVisuals) {
 		render("Type-2 clones (<project.authority>)", createVisualization(cloneClasses, files));
 	}
