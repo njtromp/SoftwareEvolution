@@ -12,8 +12,8 @@ import util::StringCleaner;
 
 
 public void play() {
-	ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
-	//ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
+	//ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
+	ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
 	//println(ast.src.path);
 	list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(ast.src)));
 	visit (ast) {
@@ -56,14 +56,19 @@ public void play() {
 	    		println(hashAST(impl));
 	    		
 			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
+			
+			println(hashes);
+			//createSuffixTree(hashes);			
 		}
 		
 	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions): {
-			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"];
+			//list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"];
+			println("method");
 		}
 		
 		case c:\constructor(str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl)): {
-			list[str] hashes = ["constructor-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
+			println("constructor");
+			//list[str] hashes = ["constructor-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
 		}
 		//case i:\import(str name): {
 		//	//todo
@@ -112,9 +117,9 @@ public list[str] hashAST(Statement stmt) {
  * This method will simply return the name as a hash (of an expression that is not handled yet)
  */
 public list[str] hashAST(Expression expression) {
-	print("unhandled type: ");
+	print("unhandled type (expression): ");
 
-	println(getName(expression));
+	println(expression);
 
 	return [getName(expression)];
 }
@@ -137,7 +142,7 @@ public list[str] hashAST(list[Statement] stmts) {
 	list[str] result = [];
 
 	for (stmt <- stmts) {
-		result += hashAST(stmt);
+		result += [intercalate("", hashAST(stmt))];
 	}
 
 	println("finished handling list of statements");
@@ -152,7 +157,7 @@ public list[str] hashAST(list[Expression] expressions) {
 	list[str] result = [];
 
 	for (expression <- expressions) {
-		result += hashAST(expression);
+		result += [intercalate("", hashAST(expression))];
 	}
 
 	// return a list with all hashes of the expressions in the list
@@ -165,7 +170,7 @@ public list[str] hashAST(list[Declaration] declarations) {
 	list[str] result = [];
 
 	for (declaration <- declarations) {
-		result += hashAST(declaration);
+		result += [intercalate("", hashAST(declaration))];
 	}
 
 	// return a list with all hashes of the declarations in the list
@@ -179,6 +184,20 @@ public list[str] hashAST(\methodCall(bool isSuper, str name, list[Expression] ar
 	hash = "method-" + name + intercalate("", arguments);
 
 	return [hash];
+}
+
+public list[str] hashAST(\methodCall(bool isSuper, Expression receiver, str name, list[Expression] arguments)){
+	println("handling method call with reciever");
+
+	//create a hash from the boolean literal keyword and append the actual value
+	hash = "methodCall" + name + intercalate("", hashAST(receiver)) + "isSuper" + (isSuper ? "true" : "false");
+
+	println("finished handling method call with reciever");
+	
+	println(hash);
+
+	// return the hash and append the hash list of the arguments
+	return [hash];// + intercalate("", hashAST(arguments))];
 }
 
 public list[str] hashAST(\foreach(Declaration parameter, Expression collection, Statement body)){
@@ -344,17 +363,6 @@ public list[str] hashAST(\booleanLiteral(bool boolValue)){
 	return [hash];
 }
 
-
-public list[str] hashAST(\methodCall(bool isSuper, Expression receiver, str name, list[Expression] arguments)){
-	println("handling method call 2");
-
-	//create a hash from the boolean literal keyword and append the actual value
-	hash = "methodCall" + name + intercalate("", hashAST(receiver)) + "isSuper" + (isSuper ? "true" : "false");
-
-	// return the hash and append the hash list of the arguments
-	return [hash + intercalate("", hashAST(arguments))];
-}
-
 public list[str] hashAST(node tree) {
 	println("hashing node");
 	list[str] result = [];
@@ -365,12 +373,17 @@ public list[str] hashAST(node tree) {
 	return getName(tree) + result;
 }
 
-public void createSuffixTree() {
+public void createSuffixTree(list[str] hashList) {
 	list[str] example = ["a", "a", "b", "x", "y", "a", "a", "b", "$"];
+	print("hashList and example");
+	
+	println(hashList);
+	println(example);
+	
 	list[str] suffix = [];
 	Node root = Node(());
-	for (i <- [size(example)-1..-1]) {
-		suffix = example[i] + suffix;
+	for (i <- [size(hashList)-1..-1]) {
+		suffix = hashList[i] + suffix;
 		root = put(root, suffix, i+1);
 	}
     visualizeSuffixTree(root);
