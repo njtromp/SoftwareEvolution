@@ -37,9 +37,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 	print(".\nDetecting Type-1 clones");
 	SuffixTree type1Clones = detectType1Clones(files, ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedType1BlocksCount()> blocks.");
-	
 	list[CloneClass] cloneClasses = detectClones(type1Clones, duplicationThreshold, sloc, cloneClassFile);
-
 	if (generateVisuals) {
 		render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
 	}
@@ -47,11 +45,9 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 	print(".\nDetecting Type-2 clones");
 	SuffixTree type2Clones = detectType2Clones(ast, duplicationThreshold);
 	println("\nAnalyzed <getAnalyzedType2BlocksCount()> blocks.");
-
 	cloneClasses = detectClones(type2Clones, duplicationThreshold, sloc, cloneClassFile);
-
 	if (generateVisuals) {
-		render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
+		render("Type-2 clones (<project.authority>)", createVisualization(cloneClasses, files));
 	}
 	
 	println("Done");

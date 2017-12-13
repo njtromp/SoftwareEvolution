@@ -26,24 +26,22 @@ public SuffixTree detectType1Clones(map[str,list[str]] files, set[Declaration] a
 		analyzedBlocks += 1;
 		str fileName = field.src.path;
 		content = files[fileName];
-		tree = analyze(tree, fileName, content[field.src.begin.line-1..field.src.end.line], field.src.begin.line, duplicationThreshold);
+		tree = addToSuffixTree(tree, fileName, content[field.src.begin.line-1..field.src.end.line], field.src.begin.line, duplicationThreshold);
 	}
 
 	// Analyze initialzer, constructors and methods
 	void analyze(Statement body) {
-		//if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "/Duplicates")) {
 		if (linesIn(body) >= duplicationThreshold) {
 			print("\b<stringChar(charAt("|/-\\", analyzedBlocks % 4))>");
 			analyzedBlocks += 1;
 			str fileName = body.src.path;
 			content = files[fileName];
-			tree = analyze(tree, fileName, content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
+			tree = addToSuffixTree(tree, fileName, content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
 		}
 	}
 
 	visit (asts) {
 		case f:\field(_, list[Expression] fragments) : {
-			//if (linesIn(f) >= duplicationThreshold && contains(f.src.path, "/Duplicates")) {
 			if (linesIn(f) >= duplicationThreshold) {
 				for (fragment <- fragments) analyze(fragment);
 			}
@@ -57,7 +55,7 @@ public SuffixTree detectType1Clones(map[str,list[str]] files, set[Declaration] a
 	return tree;
 }
 
-private SuffixTree analyze(SuffixTree tree, str fileName, list[str] lines, int cloneStart, int threshold) {
+private SuffixTree addToSuffixTree(SuffixTree tree, str fileName, list[str] lines, int cloneStart, int threshold) {
 	list[str] suffix = [];
 	for (i <- [size(lines)-1..-1]) {
 		line = trim(lines[i]);
