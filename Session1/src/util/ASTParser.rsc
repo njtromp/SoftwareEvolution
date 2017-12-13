@@ -404,10 +404,7 @@ public list[str] hashAST(\infix(Expression lhs, str operator, Expression rhs)){
 }
 
 public list[str] hashAST(\booleanLiteral(bool boolValue)){
-	//create a hash from the boolean literal keyword and append the actual value
-	hash = "booleanLiteral: " + (boolValue ? "true" : "false");
-
-	return [hash];
+	return ["boolean"];
 }
 
 
