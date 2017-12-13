@@ -1,4 +1,4 @@
-module duplication::TypeOne
+module duplication::Type1
 
 import IO;
 import Map;
@@ -8,15 +8,14 @@ import String;
 import lang::java::m3::AST;
 import util::SuffixTree;
 import util::StringCleaner;
-
-public data SourceInfo = SourceInfo(str fileName, int begin, int end);
+import duplication::CloneClasses;
 
 private int analyzedBlocks; // Used to keep track of how may blocks have been analyzed.
-public int getAnalyzedBlocksCount() {
+public int getAnalyzedType1BlocksCount() {
 	return analyzedBlocks;
 }
 
-public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
+public SuffixTree detectType1Clones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
 	analyzedBlocks = 0;
 	SuffixTree tree = SuffixTree(Node([], ()));
 	print(".");
@@ -27,24 +26,22 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 		analyzedBlocks += 1;
 		str fileName = field.src.path;
 		content = files[fileName];
-		tree = analyze(tree, fileName, content[field.src.begin.line-1..field.src.end.line], field.src.begin.line, duplicationThreshold);
+		tree = addToSuffixTree(tree, fileName, content[field.src.begin.line-1..field.src.end.line], field.src.begin.line, duplicationThreshold);
 	}
 
 	// Analyze initialzer, constructors and methods
 	void analyze(Statement body) {
-		//if (linesIn(body) >= duplicationThreshold && contains(body.src.path, "/Duplicates")) {
 		if (linesIn(body) >= duplicationThreshold) {
 			print("\b<stringChar(charAt("|/-\\", analyzedBlocks % 4))>");
 			analyzedBlocks += 1;
 			str fileName = body.src.path;
 			content = files[fileName];
-			tree = analyze(tree, fileName, content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
+			tree = addToSuffixTree(tree, fileName, content[body.src.begin.line-1..body.src.end.line], body.src.begin.line, duplicationThreshold);
 		}
 	}
 
 	visit (asts) {
 		case f:\field(_, list[Expression] fragments) : {
-			//if (linesIn(f) >= duplicationThreshold && contains(f.src.path, "/Duplicates")) {
 			if (linesIn(f) >= duplicationThreshold) {
 				for (fragment <- fragments) analyze(fragment);
 			}
@@ -58,7 +55,7 @@ public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] a
 	return tree;
 }
 
-private SuffixTree analyze(SuffixTree tree, str fileName, list[str] lines, int cloneStart, int threshold) {
+private SuffixTree addToSuffixTree(SuffixTree tree, str fileName, list[str] lines, int cloneStart, int threshold) {
 	list[str] suffix = [];
 	for (i <- [size(lines)-1..-1]) {
 		line = trim(lines[i]);

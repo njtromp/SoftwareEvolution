@@ -8,9 +8,10 @@ import String;
 import vis::Render;
 import util::ValueUI;
 import util::SuffixTree;
-import duplication::TypeOne;
+import duplication::Type1;
 
 public alias Fragment = list[str];
+public data SourceInfo = SourceInfo(str fileName, int begin, int end);
 public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
