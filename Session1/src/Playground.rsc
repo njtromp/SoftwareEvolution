@@ -145,22 +145,18 @@ public list[str] hashAST(list[Declaration] declarations) {
 }
 
 public list[str] hashAST(list[Type] types){
-	//println("unhandled: list of types");
 	return ["list of types (unhandled)"];
 }
 
 public list[str] hashAST(\simpleName(str name)){
-	//return [name];
 	return ["variable"];
 }
 
 public list[str] hashAST(\number(str numberValue)){
-	//return [numberValue];
 	return ["number"];
 }
 
 public list[str] hashAST(\parameter(Type \type, str name, int extraDimensions)){
-	//return [name];
 	return ["param"];
 }
 
@@ -177,7 +173,6 @@ public list[str] hashAST(\variable(str name, int extraDimensions, Expression \in
 }
 
 public list[str] hashAST(\postfix(Expression operand, str operator)){
-	//return [name];
 	return [intercalate("", hashAST(operand)) + operator];
 }
 
