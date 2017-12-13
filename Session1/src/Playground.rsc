@@ -17,12 +17,6 @@ public void play() {
 	//println(ast.src.path);
 	list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(ast.src)));
 	visit (ast) {
-		case u:\compilationUnit(list[Declaration] imports, list[Declaration] types): {
-			list[str] hashes = hashAST(imports) + hashAST(types);
-		}
-		case u:\compilationUnit(Declaration package, list[Declaration] imports, list[Declaration] types): {
-			list[str] hashes = hashAST(package) + hashAST(imports) + hashAST(types);
-		}
 		case e:\enum(str name, list[Type] implements, list[Declaration] constants, list[Declaration] body):{
 			list[str] hashes = ["enum" + name] + hashAST(implements) + hashAST(constants) + hashAST(body);
 		}
@@ -47,58 +41,44 @@ public void play() {
 		case i:\initializer(Statement initializerBody): {
 			list[str] hashes = hashAST(initializerBody);
 		}
-
 	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl)): {
 	    		println("hashing method <name>");
 	    		
 			//println("\n<m.src.path>.<name>(): (<b.src.begin.line>, <b.src.end.line>)");
-	    	
-	    		println(hashAST(impl));
 	    		
 			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
 			
-			println(hashes);
-			//createSuffixTree(hashes);			
+			println("--------Method <name> hashed--------");
+			for (line <- hashes){
+				//println("----");
+			
+				println(line);
+			
+				println("----");
+			}
+			//println(hashes);
+			println("------------------------------------");
 		}
 		
 	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions): {
-			//list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"];
-			println("method");
+			list[str] hashes = ["method-(" + intercalate(",", hashAST(parameters)) + ")"];
 		}
 		
 		case c:\constructor(str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl)): {
-			println("constructor");
-			//list[str] hashes = ["constructor-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
+			list[str] hashes = ["constructor-(" + intercalate(",", hashAST(parameters)) + ")"] + hashAST(impl);
 		}
-		//case i:\import(str name): {
-		//	//todo
-		//}
-		//case p:\package(str name): {
-		//	//todo
-		//}
-	 //   case p:\package(Declaration parentPackage, str name){
-		//	//todo
-		//}
 	 //   case v:\variables(Type \type, list[Expression] \fragments){
 		//	// todo
 		//}
 	 //   case t:\typeParameter(str name, list[Type] extendsList){
 		//	// todo
 		//}
-	 //   case a:\annotationType(str name, list[Declaration] body){
-		//	// todo
-		//}
-	 //   case a:\annotationTypeMember(Type \type, str name){
-		//	//todo
-		//}
-	 //   case a:\annotationTypeMember(Type \type, str name, Expression defaultBlock){
-		//	//todo
-		//}
 	    case p:\parameter(Type \type, str name, int extraDimensions): {
 			list [str] hashes = ["param"];
 		}
 	 //   case v:\vararg(Type \type, str name): {
 		//	//todo
+	
 		//}
 	}
 }
@@ -107,7 +87,7 @@ public void play() {
  * This method will simply return the name as a hash (of an expression that is not handled yet)
  */
 public list[str] hashAST(Statement stmt) {
-	print("unhandled type: ");
+	print("unhandled statement: ");
 	println(getName(stmt));
 
 	return [getName(stmt)];
@@ -117,7 +97,7 @@ public list[str] hashAST(Statement stmt) {
  * This method will simply return the name as a hash (of an expression that is not handled yet)
  */
 public list[str] hashAST(Expression expression) {
-	print("unhandled type (expression): ");
+	print("unhandled expression: ");
 
 	println(expression);
 
@@ -128,7 +108,7 @@ public list[str] hashAST(Expression expression) {
  * This method will simply return the name as a hash (of a declaration that is not handled yet)
  */
 public list[str] hashAST(Declaration declaration) {
-	print("unhandled type: ");
+	print("unhandled declaration: ");
 
 	println(getName(declaration));
 
@@ -145,7 +125,9 @@ public list[str] hashAST(list[Statement] stmts) {
 		result += [intercalate("", hashAST(stmt))];
 	}
 
-	println("finished handling list of statements");
+	print("finished handling list of statements: ");
+	
+	println(result);
 
 	// return a list with all hashes of the statements in the list
 	return result;
@@ -231,7 +213,7 @@ public list[str] hashAST(\block(list[Statement] statements)) {
 	println("handling block");
 
 	// simply return a hash of the statements
-	return [hashAST(statements)];
+	return hashAST(statements);
 }
 
 public list[str] hashAST(\if(Expression condition, Statement thenBranch)){
@@ -329,7 +311,7 @@ public list[str] hashAST(\while(Expression condition, Statement body)){
 	hash = ["while"] + intercalate("", hashAST(condition));
 
 	// append the hash list of the body to the hash
-	return [hash] + hashAST(body);
+	return hash + hashAST(body);
 }
 
 public list[str] hashAST(\expressionStatement(Expression statement)){
@@ -358,7 +340,7 @@ public list[str] hashAST(\infix(Expression lhs, str operator, Expression rhs)){
 
 public list[str] hashAST(\booleanLiteral(bool boolValue)){
 	//create a hash from the boolean literal keyword and append the actual value
-	hash = "booleanLiteral" + boolValue ? "true" : "false";
+	hash = "booleanLiteral" + (boolValue ? "true" : "false");
 
 	return [hash];
 }

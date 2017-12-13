@@ -1,5 +1,6 @@
 package test.java;
 public class Duplicates {
+	
 	public void method1() {
 		int a = 1;
 		int b = 2;
@@ -15,11 +16,11 @@ public class Duplicates {
 		int e = 6;
 	}
 	public void method3() {
-		{
 		int a = 1;
-		int b = 2;
-		int c = 3;
-		int d = 4;
+		if(a == 3){
+			int b = 2;
+			int c = 3;
+			int d = 4;
 		}
 		int e = 6;
 		int f = 7;
