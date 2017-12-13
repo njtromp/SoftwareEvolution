@@ -15,7 +15,7 @@ import duplication::TypeOne;
 import duplication::CloneClasses;
 import duplication::Visualization;
 
-public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |home:///Desktop/clone-classes.txt| ) {
+public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile = |home:///Desktop/clone-classes.txt|, bool generateVisual = true ) {
 	println("======================");
 	println("Nico Tromp & Rob Kunst");
 	println("----------------------");
@@ -52,7 +52,9 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClassFile =
 
 	writeFile(cloneClassFile, duplication::CloneClasses::toString(cloneClasses));
 	
-	render(createVisualization(cloneClasses, files));
+	if (generateVisual) {
+		render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
+	}
 	
 	println("Done");
 }
