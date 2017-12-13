@@ -11,11 +11,15 @@ import util::ASTParser;
 import util::SuffixTree;
 import util::StringCleaner;
 
+public set[str] unhandled = {};
+
 
 public void play() {
 	//ast = createAstFromFile(|project://Session1/src/test/java/Duplicates.java|, true);
-	ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
-	//ast = createAstsFromEclipseProject(|project://SmallSql|, true);
+	//ast = createAstFromFile(|project://Session1/src/test/java/SimpleJava.java|, true);
+	ast = createAstsFromEclipseProject(|project://SmallSql|, true);
+	
+	unhandled = {};
 	
 	//println(ast.src.path);
 	//list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(ast.src)));
@@ -54,10 +58,7 @@ public void play() {
 			println("--------Method <name> hashed--------");
 			for (line <- hashes){
 				println(line);
-				println();
 			}
-			//println(hashes);
-			println("------------------------------------");
 		}
 		
 	    case m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions): {
@@ -81,4 +82,9 @@ public void play() {
 	
 		//}
 	}
+	
+	for(item <- unhandled){
+		println(item);
+	}
+	
 }
