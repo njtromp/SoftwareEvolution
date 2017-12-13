@@ -7,15 +7,12 @@ import List;
 import String;
 import lang::java::m3::AST;
 import util::SuffixTree;
+import util::ASTParser;
 import duplication::CloneClasses;
 
 private int analyzedBlocks; // Used to keep track of how may blocks have been analyzed.
 public int getAnalyzedType2BlocksCount() {
 	return analyzedBlocks;
-}
-
-private list[str] hashAST(value blah) {
-	return ["if var \< 10","else", "end-if"];
 }
 
 public SuffixTree detectType2Clones(set[Declaration] asts, int duplicationThreshold) {
