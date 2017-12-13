@@ -5,7 +5,7 @@ import Map;
 import List;
 import String;
 import vis::Figure;
-import duplication::TypeOne;
+import duplication::Type1;
 import duplication::CloneClasses;
 
 public Figure createVisualization(list[CloneClass] cloneClasses, map[str, list[str]] files) {

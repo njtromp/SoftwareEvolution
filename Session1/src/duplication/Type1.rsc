@@ -1,4 +1,4 @@
-module duplication::TypeOne
+module duplication::Type1
 
 import IO;
 import Map;

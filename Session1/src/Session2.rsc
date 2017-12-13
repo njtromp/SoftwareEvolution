@@ -11,7 +11,7 @@ import util::FileSystem;
 import lang::java::jdt::m3::AST;
 import util::StringCleaner;
 import util::SuffixTree;
-import duplication::TypeOne;
+import duplication::Type1;
 import duplication::CloneClasses;
 import duplication::Visualization;
 
