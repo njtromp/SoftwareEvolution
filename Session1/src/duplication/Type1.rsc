@@ -8,15 +8,14 @@ import String;
 import lang::java::m3::AST;
 import util::SuffixTree;
 import util::StringCleaner;
-
-public data SourceInfo = SourceInfo(str fileName, int begin, int end);
+import duplication::CloneClasses;
 
 private int analyzedBlocks; // Used to keep track of how may blocks have been analyzed.
 public int getAnalyzedBlocksCount() {
 	return analyzedBlocks;
 }
 
-public SuffixTree detectTypeIClones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
+public SuffixTree detectType1Clones(map[str,list[str]] files, set[Declaration] asts, int duplicationThreshold) {
 	analyzedBlocks = 0;
 	SuffixTree tree = SuffixTree(Node([], ()));
 	print(".");
