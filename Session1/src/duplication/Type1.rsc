@@ -11,7 +11,7 @@ import util::StringCleaner;
 import duplication::CloneClasses;
 
 private int analyzedBlocks; // Used to keep track of how may blocks have been analyzed.
-public int getAnalyzedBlocksCount() {
+public int getAnalyzedType1BlocksCount() {
 	return analyzedBlocks;
 }
 
