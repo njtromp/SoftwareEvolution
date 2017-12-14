@@ -23,6 +23,12 @@ public list[LineInfo] hashAST(m:\method(Type returnType, str name, list[Declarat
 	return [<"method(<lines(", ", hashedParams)>) <size(exceptions) > 0 ? "throws " : ""> <lines(", ", hashedExceps)>", lineNrs(m) + lineNrs(hashedParams) + lineNrs(hashedExceps)>] + hashAST(impl);
 }
 
+public list[LineInfo] hashAST(c:\constructor(str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl)) {
+	hashedParams = hashAST(parameters);
+	hashedExceps = hashAST(exceptions);
+	return [<"constructor(<lines(", ", hashedParams)>) <size(exceptions) > 0 ? "throws " : ""> <lines(", ", hashedExceps)>", lineNrs(c) + lineNrs(hashedParams) + lineNrs(hashedExceps)>] + hashAST(impl);
+}
+
 /**
  * This method will simply return the name as a hash (of an expression that is not handled yet)
  */
