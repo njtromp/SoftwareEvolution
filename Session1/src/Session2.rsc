@@ -23,9 +23,11 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 
 	print("Loading files");
 	map[str,list[str]] files = ();
+	map[str,list[str]] rawFiles = ();
 	int sloc = 0;
 	for (f <- find(project, "java")) {
-		list[str] lines = removeSingleLineComments(removeMultiLineComments(readFileLines(f)));
+		rawFiles += (f.path : readFileLines(f));
+		list[str] lines = removeSingleLineComments(removeMultiLineComments(rawFiles[f.path]));
 		sloc += size(removeEmptyLines(lines));
 		files += (f.path : lines);
 	}
@@ -40,7 +42,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 		println("\nAnalyzed <getAnalyzedType1BlocksCount()> blocks.");
 		print("Detecting clone-classes");
 		list[CloneClass] cloneClasses = detectCloneClasses(type1Tree, duplicationThreshold);
-		printCloneSummary(project, files, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
+		printCloneSummary(project, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
 		if (createVisuals) {
 			render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
 		}
@@ -53,7 +55,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 		print("Detecting clone-classes");
 		cloneClasses = detectCloneClasses(type2Tree, duplicationThreshold);
 		cloneClasses = removeFragments(cloneClasses);
-		printCloneSummary(project, files, cloneClasses, duplicationThreshold, sloc, cloneClass2File);
+		printCloneSummary(project, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass2File);
 		if (createVisuals) {
 			render("Type-2 clones (<project.authority>)", createVisualization(cloneClasses, files));
 		}
@@ -89,18 +91,27 @@ private list[CloneClass] removeFragments(list[CloneClass] cloneClasses) {
 }
 
 private void printCloneClass(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
-	println("--- Clone class ---");
+	for (line <- toStrings(project, cloneClasses, files)) println(line);
+}
+
+private list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
+	list[str] asString = ["--- Clone class ---"];
 	for (cloneClass <- cloneClasses) {
+		addSource = true;
 		for (source <- cloneClass.sources) {
-			loc location = |project://Session1|(0,0,<0,0>,<0,0>);
+			loc location = |project://Dummy|(0,0,<0,1>,<0,1>);
 			location.authority = project.authority;
 			location.path = source.fileName;
 			location.end.line = source.end;
 			location.begin.line = source.begin;
-			println(location);
-			for (i <- [source.begin-1 .. source.end]) {
-				println("<files[source.fileName][i]>");
+			location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. source.begin-1]]);
+			location.length = sum([size(line) + 1 | line <- files[source.fileName][source.begin-1 .. source.end]]);
+			asString += "<location>";
+			if (size(cloneClass.fragment) == 0 || addSource) {
+				asString += files[source.fileName][source.begin-1 .. source.end];
+				addSource = false;
 			}
 		}
 	}
+	return asString;
 }
