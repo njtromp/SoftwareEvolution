@@ -36,9 +36,11 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 
 	if (detectType1) {
 		print(".\nDetecting Type-1 clones");
-		SuffixTree type1Clones = detectType1Clones(files, ast, duplicationThreshold);
+		SuffixTree type1Tree = detectType1Clones(files, ast, duplicationThreshold);
 		println("\nAnalyzed <getAnalyzedType1BlocksCount()> blocks.");
-		list[CloneClass] cloneClasses = detectClones(type1Clones, duplicationThreshold, sloc, cloneClass1File);
+		print("Detecting clone-classes");
+		list[CloneClass] cloneClasses = detectCloneClasses(type1Tree, duplicationThreshold);
+		printCloneSummary(cloneClasses, duplicationThreshold, sloc, cloneClass1File);
 		if (createVisuals) {
 			render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
 		}
@@ -46,9 +48,12 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 	
 	if (detectType2) {
 		print(".\nDetecting Type-2 clones");
-		SuffixTree type2Clones = detectType2Clones(ast, duplicationThreshold);
+		SuffixTree type2Tree = detectType2Clones(ast, duplicationThreshold);
 		println("\nAnalyzed <getAnalyzedType2BlocksCount()> blocks.");
-		cloneClasses = detectClones(type2Clones, duplicationThreshold, sloc, cloneClass2File);
+		print("Detecting clone-classes");
+		cloneClasses = detectCloneClasses(type2Tree, duplicationThreshold);
+		cloneClasses = removeFragments(cloneClasses);
+		printCloneSummary(cloneClasses, duplicationThreshold, sloc, cloneClass2File);
 		if (createVisuals) {
 			render("Type-2 clones (<project.authority>)", createVisualization(cloneClasses, files));
 		}
@@ -57,9 +62,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 	println("Done");
 }
 
-private list[CloneClass] detectClones(SuffixTree clones, int duplicationThreshold, int sloc, loc cloneClassFile) {
-	print("Detecting clone-classes");
-	list[CloneClass] cloneClasses = detectCloneClasses(clones, duplicationThreshold);
+private void printCloneSummary(list[CloneClass] cloneClasses, int duplicationThreshold, int sloc, loc cloneClassFile) {
 	if (size(cloneClasses) > 0) {
 		int clonedLines = sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses]);
 		println("\nFound <size(cloneClasses)> clone classes.");
@@ -76,6 +79,8 @@ private list[CloneClass] detectClones(SuffixTree clones, int duplicationThreshol
 	} else {
 		println("\nNo clones detected!");
 	}
+}
 
-	return cloneClasses;
+private list[CloneClass] removeFragments(list[CloneClass] cloneClasses) {
+	return [ CloneClass(sources, []) | CloneClass(sources, _) <- cloneClasses];
 }
