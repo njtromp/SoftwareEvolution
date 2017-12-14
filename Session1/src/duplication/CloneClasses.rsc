@@ -126,6 +126,9 @@ private list[SourceInfo] cast(list[value] lst) {
 			case SourceInfo(source, begin, end) : {
 				sources += [SourceInfo(source, begin, end)];
 			}
+			case SourceInfo(source, begin, end, lineNrs) : {
+				sources += [SourceInfo(source, begin, end, lineNrs)];
+			}
 		}
 	}
 	return sort(sources);
