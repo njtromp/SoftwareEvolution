@@ -52,20 +52,6 @@ private bool isUnbranched(Node \node) {
 	}
 }
 
-public SuffixTree removeShortBranches(SuffixTree tree, int threshold) {
-	tree.root = removeShortBranches(tree.root, threshold, 1);
-	return tree;
-}
-
-private Node removeShortBranches(Node \node, int threshold, int depth) {
-	for (n <- \node.next) {
-		if (isShortBranch(\node.next[n], threshold, depth + 1)) {
-			\node.next = delete(\node.next, n);
-		}
-	}
-	return \node;
-}
-
 private bool isShortBranch(Node \node, int threshold, int depth) {
 	if (depth >= threshold) {
 		return false;

@@ -45,12 +45,14 @@ public SuffixTree detectType2Clones(set[Declaration] asts, int duplicationThresh
 
 private SuffixTree addToSuffixTree(SuffixTree tree, str fileName, list[LineInfo] lines, int cloneStart, int threshold) {
 	list[str] suffix = [];
+	set[int] lineNrs = {};
 	for (i <- [size(lines)-1..-1]) {
 		lineNr += 1;
 		line = trim(lines[i].line);
 		if (!isEmpty(line)) {
 			suffix = line + suffix;
-			tree = put(tree, suffix, SourceInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1, lines[i].lineNrs));
+			lineNrs += lines[i].lineNrs;
+			tree = put(tree, suffix, SourceInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1, lineNrs));
 		}
 	}
 	return tree;

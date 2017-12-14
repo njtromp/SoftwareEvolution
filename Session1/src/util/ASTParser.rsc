@@ -116,7 +116,7 @@ public list[LineInfo] hashAST(v:\variable(str name, int extraDimensions)){
 
 public list[LineInfo] hashAST(v:\variable(str name, int extraDimensions, Expression \initializer)){
 	hashed = hashAST(\initializer);
-	return [<"variable <lines(" ", hashed)>", lineNrs(v) + lineNrs(hashed)>];
+	return [<"variable = <lines(" ", hashed)>", lineNrs(v) + lineNrs(hashed)>];
 }
 
 public list[LineInfo] hashAST(p:\prefix(str operator, Expression operand)){
@@ -418,7 +418,7 @@ public list[LineInfo] hashAST(c:\catch(Declaration exception, Statement body)){
 public list[LineInfo] hashAST(\declarationStatement(Declaration declaration)){
 	// prepend the declarationStatement keyword to the declaration hash
 	hashed = hashAST(declaration);
-	hash = <"declarationStatement " + lines(" ", hashed), lineNrs(hashed)>;
+	hash = <lines(" ", hashed), lineNrs(hashed)>;
 
 	return [hash];
 }

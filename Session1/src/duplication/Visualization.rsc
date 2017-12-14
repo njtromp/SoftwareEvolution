@@ -17,6 +17,7 @@ public Figure createVisualization(list[CloneClass] cloneClasses, map[str, list[s
 
 	Figure createCloneBoxes(str fileName, int maxSize) {
 		cloneInfo = [ CloneClass([si], cloneClass.fragment) | cloneClass <- cloneClasses, si:SourceInfo(str fn, _, _) <- cloneClass.sources, fn == fileName];
+		//return box(vcat([box(size(20, clone.sources[0].end - clone.sources[0].begin + 1), valign(1.0*clone.sources[0].begin / maxSize), vshrink(1.0*(clone.sources[0].end - clone.sources[0].begin + 1)/maxSize), showCloneInfo(clone)) | clone <- cloneInfo]), size(22, maxSize));
 		return box(vcat([box(size(20, clone.sources[0].end - clone.sources[0].begin + 1), valign(1.0*clone.sources[0].begin / maxSize), showCloneInfo(clone)) | clone <- cloneInfo]), size(22, maxSize));
 	}
 

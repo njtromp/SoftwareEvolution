@@ -21,10 +21,6 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\b.");
 	
 	print("\>");
-	tree = removeShortBranches(tree, threshold);
-	print("\b.");
-
-	print("\>");
 	Fragment emptyFragment = [];
 	cloneClasses = detectCloneClasses(tree.root, threshold, 1, emptyFragment);
 	print("\b.");
@@ -32,7 +28,11 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\>");
 	cloneClasses = subsumption(cloneClasses);
 	print("\b.");
-		
+				
+	print("\>");
+	cloneClasses = convertSourceInfo(cloneClasses);
+	print("\b.");
+
 	return cloneClasses;
 }
 
@@ -98,6 +98,19 @@ private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
 		}
 	} 
 	return toList(range(subsumptions));
+}
+
+private list[CloneClass] convertSourceInfo(list[CloneClass] cloneClasses) {
+	return [CloneClass([convertSourceInfo(source) | source <- sources], fragment) | CloneClass(sources, fragment) <- cloneClasses];
+}
+
+private SourceInfo convertSourceInfo(s:SourceInfo(_ ,_ ,_)) {
+	return s;
+}
+
+private SourceInfo convertSourceInfo(SourceInfo(fileName, _, _, lineNrs)) {
+	sortedLineNrs = sort(toList(lineNrs));
+	return SourceInfo(fileName, head(sortedLineNrs), head(reverse(sortedLineNrs)));
 }
 
 // The current implementation is very greedy, it only check for the first entry of a list.
