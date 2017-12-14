@@ -16,11 +16,6 @@ public data SourceInfo = SourceInfo(str fileName, int begin, int end)
 public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
-	// Just for debugging purposes!
-	//text(tree.root);
-	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree-raw.png|);
-	//render(visualizeSuffixTree(tree));
-
 	print("\>");
 	tree = removeLinearBranches(tree);
 	print("\b.");
@@ -28,11 +23,6 @@ public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\>");
 	tree = removeShortBranches(tree, threshold);
 	print("\b.");
-
-	// Just for debugging purposes!
-	//text(tree.root);
-	//renderSave(visualizeSuffixTree(tree), |file:///Users/nico/Desktop/suffix-tree.png|);
-	//render(visualizeSuffixTree(tree));
 
 	print("\>");
 	Fragment emptyFragment = [];
