@@ -11,7 +11,8 @@ import util::SuffixTree;
 import duplication::Type1;
 
 public alias Fragment = list[str];
-public data SourceInfo = SourceInfo(str fileName, int begin, int end);
+public data SourceInfo = SourceInfo(str fileName, int begin, int end)
+                       | SourceInfo(str fileName, int begin, int end, set[int] lineNrs);
 public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
@@ -110,7 +111,7 @@ private list[CloneClass] subsumption(list[CloneClass] cloneClasses) {
 }
 
 // The current implementation is very greedy, it only check for the first entry of a list.
-// When the list are sorted if should be oke, since this method is only called when there
+// When the lists are sorted if should be oke, since this method is only called when there
 // is a match as a map key. 
 private bool contains(list[SourceInfo] candidate, list[SourceInfo] current) {
 	return candidate[0].begin < current[0].begin;

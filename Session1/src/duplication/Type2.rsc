@@ -11,12 +11,14 @@ import util::ASTParser;
 import duplication::CloneClasses;
 
 private int analyzedBlocks; // Used to keep track of how may blocks have been analyzed.
+private int lineNr; // Needed for generating unique linenumbers
 public int getAnalyzedType2BlocksCount() {
 	return analyzedBlocks;
 }
 
 public SuffixTree detectType2Clones(set[Declaration] asts, int duplicationThreshold) {
 	analyzedBlocks = 0;
+	lineNr = 0;
 	SuffixTree tree = SuffixTree(Node([], ()));
 	print(".");
 
@@ -24,9 +26,9 @@ public SuffixTree detectType2Clones(set[Declaration] asts, int duplicationThresh
 		print("\b<stringChar(charAt("|/-\\", analyzedBlocks % 4))>");
 		analyzedBlocks += 1;
 		str fileName = decl.src.path;
-		content = hashAST(decl);
+		list[LineInfo] content = hashAST(decl);
 		if (size(content) >= duplicationThreshold) {
-			tree = addToSuffixTree(tree, fileName, content, decl.src.begin.line, duplicationThreshold);
+			tree = addToSuffixTree(tree, fileName, content, lineNr, duplicationThreshold);
 		}
 	}
 
@@ -41,17 +43,15 @@ public SuffixTree detectType2Clones(set[Declaration] asts, int duplicationThresh
 	return tree;
 }
 
-private SuffixTree addToSuffixTree(SuffixTree tree, str fileName, list[str] lines, int cloneStart, int threshold) {
+private SuffixTree addToSuffixTree(SuffixTree tree, str fileName, list[LineInfo] lines, int cloneStart, int threshold) {
 	list[str] suffix = [];
 	for (i <- [size(lines)-1..-1]) {
-		line = trim(lines[i]);
+		lineNr += 1;
+		line = trim(lines[i].line);
 		if (!isEmpty(line)) {
 			suffix = line + suffix;
-			tree = put(tree, suffix, SourceInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1));
+			tree = put(tree, suffix, SourceInfo(fileName, cloneStart + i, cloneStart + size(lines) - 1, lines[i].lineNrs));
 		}
 	}
 	return tree;
 }
-
-private 	int linesIn(Statement stmt) = stmt.src.end.line - stmt.src.begin.line + 1;
-private 	int linesIn(Declaration decl) = decl.src.end.line - decl.src.begin.line + 1;
