@@ -13,9 +13,14 @@ public set[str] unhandled = {};
 
 public alias LineInfo = tuple[str line, set[int] lineNrs]; 
 
-public list[LineInfo] hashAST(m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions, b:\block(impl))) {
-	list[LineInfo] hashed = hashAST(parameters);
-	return [<"method(" + lines(", ", hashed) + ")", lineNrs(hashed)>] + hashAST(impl);
+public list[LineInfo] hashAST(f:\field(Type \type, list[Expression] fragments)) {
+	return [<"field ", lineNrs(f)>] + hashAST(fragments);
+}
+
+public list[LineInfo] hashAST(m:\method(Type returnType, str name, list[Declaration] parameters, list[Expression] exceptions, \block(impl))) {
+	hashedParams = hashAST(parameters);
+	hashedExceps = hashAST(exceptions);
+	return [<"method(<lines(", ", hashedParams)>) <size(exceptions) > 0 ? "throws " : ""> <lines(", ", hashedExceps)>", lineNrs(m) + lineNrs(hashedParams) + lineNrs(hashedExceps)>] + hashAST(impl);
 }
 
 /**
@@ -100,7 +105,8 @@ public list[LineInfo] hashAST(v:\variable(str name, int extraDimensions)){
 }
 
 public list[LineInfo] hashAST(v:\variable(str name, int extraDimensions, Expression \initializer)){
-	return [<"variable", lineNrs(v)>];
+	hashed = hashAST(\initializer);
+	return [<"variable <lines(" ", hashed)>", lineNrs(v) + lineNrs(hashed)>];
 }
 
 public list[LineInfo] hashAST(p:\prefix(str operator, Expression operand)){
@@ -230,11 +236,6 @@ public list[LineInfo] hashAST(s:\synchronizedStatement(Expression lock, Statemen
 	return [<"synchronized", lineNrs(s)>] + hashAST(body) + [<"end synchronized", lineNrs(s)>];
 }
 
-//todo
-public list[LineInfo] hashAST(m:\method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl)){
-	return [<"method", lineNrs(m)>];
-}
-
 public list[LineInfo] hashAST(\bracket(Expression expression)){
 	//todo do we have to do anything with this bracket???
 	return hashAST(expression);
@@ -332,7 +333,7 @@ public list[LineInfo] hashAST(\block(list[Statement] statements)) {
 public list[LineInfo] hashAST(i:\if(Expression condition, Statement thenBranch)){
 	// build a hash for the if statement
 	hashedCond = hashAST(condition);
-	hash = <"if" + lines(" ", hashedCond), lineNrs(i) + lineNrs(hashedCond)>;
+	hash = <"if " + lines(" ", hashedCond), lineNrs(i) + lineNrs(hashedCond)>;
 
 	// add the hash to a list and append the hash of the body
 	hashedThen = hashAST(thenBranch);
