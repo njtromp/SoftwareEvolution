@@ -434,9 +434,9 @@ public list[LineInfo] hashAST(\expressionStatement(Expression statement)){
 //\constructorCall(bool isSuper, list[Expression] arguments)
 
 //expressions
-public list[LineInfo] hashAST(i:\infix(Expression lhs, str operator, Expression rhs)){
+public list[LineInfo] hashAST(\infix(Expression lhs, str operator, Expression rhs)){
 	// build the hash based on the left hand side , operator and right hand side
-	list[LineInfo] hashed = hashAST(lhs) + [<operator, lineNrs(i)>] + hashAST(rhs);
+	list[LineInfo] hashed = hashAST(lhs) + [<operator, {}>] + hashAST(rhs);
 
 	// get the string value
 	hash = <lines(" ", hashed), lineNrs(hashed)>;
@@ -477,12 +477,9 @@ private set[int] lineNrs(Declaration decl) {
 }
 
 private set[int] lineNrs(Expression expr) {
-	println("------------------------------------");
-	println(expr);
 	return {expr.src.begin.line, expr.src.end.line};
 }
 
 private set[int] lineNrs(Type t) {
 	return {t.src.begin.line, t.src.end.line};
 }
-
