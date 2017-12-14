@@ -29,6 +29,10 @@ public list[LineInfo] hashAST(c:\constructor(str name, list[Declaration] paramet
 	return [<"constructor(<lines(", ", hashedParams)>) <size(exceptions) > 0 ? "throws " : ""> <lines(", ", hashedExceps)>", lineNrs(c) + lineNrs(hashedParams) + lineNrs(hashedExceps)>] + hashAST(impl);
 }
 
+public list[LineInfo] hashAST(i:\initializer(Statement initializerBody)) {
+	return [<"initializer", lineNrs(i)>] + hashAST(initializerBody);
+}
+
 /**
  * This method will simply return the name as a hash (of an expression that is not handled yet)
  */
