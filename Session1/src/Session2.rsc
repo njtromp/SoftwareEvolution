@@ -107,7 +107,7 @@ private list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str,
 				asString += files[source.fileName][source.begin-1 .. source.end];
 			}
 		} else {
-			// Type 1 clone handling (empty lines)
+			// Type 1 clone handling
 			for (source <- cloneClass.sources) {
 				// By placing it here we have access to everything we need without passing everything as a parameter
 				loc adjustForEmptyLines(loc location) {
@@ -126,9 +126,10 @@ private list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str,
 				}
 				
 				location = createCloneLocation(project, source);
+				// The fragment only holds non-empty lines so we need to adjust the end line for this.
 				location = adjustForEmptyLines(location);
-				location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. location.begin.line - 1]]);
-				location.length = sum([size(line) + 1 | line <- files[source.fileName][location.begin.line - 1 .. location.end.line]]);
+				location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
+				location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
 				asString += "<location>";
 			}
 			asString += cloneClass.fragment;
@@ -144,4 +145,8 @@ private loc createCloneLocation(loc project, SourceInfo source) {
 	location.end.line = source.end;
 	location.begin.line = source.begin;
 	return location;
+}
+
+private int length(list[str] lines) {
+	return sum([size(line) + 1 | line <- lines]);
 }
