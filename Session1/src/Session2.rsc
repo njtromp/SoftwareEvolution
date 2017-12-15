@@ -97,21 +97,51 @@ private void printCloneClass(loc project, list[CloneClass] cloneClasses, map[str
 private list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
 	list[str] asString = ["--- Clone class ---"];
 	for (cloneClass <- cloneClasses) {
-		addSource = true;
-		for (source <- cloneClass.sources) {
-			loc location = |project://Dummy|(0,0,<0,1>,<0,1>);
-			location.authority = project.authority;
-			location.path = source.fileName;
-			location.end.line = source.end;
-			location.begin.line = source.begin;
-			location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. source.begin-1]]);
-			location.length = sum([size(line) + 1 | line <- files[source.fileName][source.begin-1 .. source.end]]);
-			asString += "<location>";
-			if (size(cloneClass.fragment) == 0 || addSource) {
+		if (size(cloneClass.fragment) == 0) {
+			// Type 2 clone handling
+			for (source <- cloneClass.sources) {
+				location = createCloneLocation(project, source);
+				location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. source.begin-1]]);
+				location.length = sum([size(line) + 1 | line <- files[source.fileName][source.begin-1 .. source.end]]);
+				asString += "<location>";
 				asString += files[source.fileName][source.begin-1 .. source.end];
-				addSource = false;
 			}
+		} else {
+			// Type 1 clone handling (empty lines)
+			for (source <- cloneClass.sources) {
+				// By placing it here we have access to everything we need without passing everything as a parameter
+				loc adjustForEmptyLines(loc location) {
+					int line = location.begin.line - 1;
+					endLine = location.begin.line - 1;
+					lineCount = size(cloneClass.fragment);
+					while (lineCount > 0) {
+						if (!isEmpty(trim(files[source.fileName][line]))) {
+							lineCount -= 1;
+						}
+						endLine += 1;
+						line += 1;
+					}
+					location.end.line = endLine;
+					return location;
+				}
+				
+				location = createCloneLocation(project, source);
+				location = adjustForEmptyLines(location);
+				location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. location.begin.line - 1]]);
+				location.length = sum([size(line) + 1 | line <- files[source.fileName][location.begin.line - 1 .. location.end.line]]);
+				asString += "<location>";
+			}
+			asString += cloneClass.fragment;
 		}
 	}
 	return asString;
+}
+
+private loc createCloneLocation(loc project, SourceInfo source) {
+	loc location = |project://Dummy|(0,0,<0,1>,<0,1>);
+	location.authority = project.authority;
+	location.path = source.fileName;
+	location.end.line = source.end;
+	location.begin.line = source.begin;
+	return location;
 }
