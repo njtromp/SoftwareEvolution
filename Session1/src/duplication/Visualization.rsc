@@ -20,7 +20,9 @@ public Figure createVisualization(list[CloneClass] cloneClasses, map[FileName, F
 		clonesPerFile[source.fileName]? emptySet += {cloneClass};
 	}
 	
-	return createGrid(cloneClasses, sort(clonedFiles), clonesPerFile);
+	cloneGrid = createGrid(cloneClasses, sort(clonedFiles), clonesPerFile);
+	menuBar = hcat([combo(["All", "Single file", "Most files", "Largest"], void(str s){ println(s);})], vresizable(false));
+	return vcat(menuBar + [scrollable(cloneGrid)]);
 }
 
 private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
