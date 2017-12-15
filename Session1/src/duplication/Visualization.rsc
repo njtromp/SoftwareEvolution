@@ -1,5 +1,6 @@
 module duplication::Visualization
 
+import IO;
 import Set;
 import Map;
 import List;
@@ -8,30 +9,30 @@ import vis::Figure;
 import duplication::Type1;
 import duplication::CloneClasses;
 
-public Figure createVisualization(list[CloneClass] cloneClasses, map[str, list[str]] files) {
-	clonedFiles = sort(uniqueFiles(cloneClasses), bool(str fn1, str fn2){return size(files[fn1]) > size(files[fn2]);});
+alias FileName = str;
+alias FileContent = list[str];
+
+public Figure createVisualization(list[CloneClass] cloneClasses, map[FileName, FileContent] files) {
+	clonedFiles = uniqueFiles(cloneClasses);
+	map[FileName, set[CloneClass]] clonesPerFile = ();
+	set[CloneClass] emptySet = {};
+	for (cloneClass <- cloneClasses, source <- cloneClass.sources) {
+		clonesPerFile[source.fileName]? emptySet += {cloneClass};
+	}
 	
-	Figure createFileBox(str fileName) {
-		return vcat([text(head(reverse(split("/", fileName))), popup(fileName)), createCloneBoxes(fileName, size(files[fileName]))]);
-	}
-
-	Figure createCloneBoxes(str fileName, int maxSize) {
-		cloneInfo = [ CloneClass([si], cloneClass.fragment) | cloneClass <- cloneClasses, si:SourceInfo(str fn, _, _) <- cloneClass.sources, fn == fileName];
-		//return box(vcat([box(size(20, clone.sources[0].end - clone.sources[0].begin + 1), valign(1.0*clone.sources[0].begin / maxSize), vshrink(1.0*(clone.sources[0].end - clone.sources[0].begin + 1)/maxSize), showCloneInfo(clone)) | clone <- cloneInfo]), size(22, maxSize));
-		return box(vcat([box(size(20, clone.sources[0].end - clone.sources[0].begin + 1), valign(1.0*clone.sources[0].begin / maxSize), showCloneInfo(clone)) | clone <- cloneInfo]), size(22, maxSize));
-	}
-
-	return hvcat([ createFileBox(fileName) | fileName <- clonedFiles], std(gap(10)));
+	return createGrid(cloneClasses, sort(clonedFiles), clonesPerFile);
 }
 
-private list[str] uniqueFiles(list[CloneClass] cloneClasses) {
+private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
 	return toList({ fileName | cloneClass <- cloneClasses, SourceInfo(fileName, _, _) <- cloneClass.sources});
 }
 
-private FProperty showCloneInfo(CloneClass clone) {
-	return popup("Lines (<clone.sources[0].begin>, <clone.sources[0].end>)\n\n<intercalate("\n", clone.fragment)>");
-}
-private FProperty popup(str msg) {
-	return mouseOver(box(text(msg), resizable(false), right()));
+private Figure createGrid(list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
+	list[Figure] fileNameLabels = text("Clone classes") + [ text(head(reverse(split("/", fileName))), textAngle(-90)) | fileName <- fileNames];
+	list[list[Figure]] cloneInFile = [ box(fillColor("PowderBlue")) + [ box( getColor(cloneClass, clonesPerFile, fileName) ) | fileName <- fileNames ] | cloneClass <- cloneClasses];
+	return grid([fileNameLabels] + cloneInFile);
 }
 
+private FProperty getColor(CloneClass cloneClass, map[FileName, set[CloneClass]] clonesPerFile, FileName fileName) {
+	return cloneClass in clonesPerFile[fileName] ? fillColor("Red") : fillColor("White");
+}
