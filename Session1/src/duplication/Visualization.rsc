@@ -28,11 +28,16 @@ private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
 }
 
 private Figure createGrid(list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
-	list[Figure] fileNameLabels = text("Clone classes") + [ text(head(reverse(split("/", fileName))), textAngle(-90)) | fileName <- fileNames];
-	list[list[Figure]] cloneInFile = [ box(fillColor("PowderBlue")) + [ box( getColor(cloneClass, clonesPerFile, fileName) ) | fileName <- fileNames ] | cloneClass <- cloneClasses];
-	return grid([fileNameLabels] + cloneInFile);
+	list[Figure] clones = text("Classes\\Clones") + [ box(fillColor("PowderBlue")) | _ <- cloneClasses];
+	list[list[Figure]] clonesInFile = [ text(className(fileName)) + [ box( getColor(cloneClass, clonesPerFile, fileName) ) | cloneClass <- cloneClasses ] | fileName <- fileNames];
+
+	return grid([clones] + clonesInFile);
 }
 
 private FProperty getColor(CloneClass cloneClass, map[FileName, set[CloneClass]] clonesPerFile, FileName fileName) {
-	return cloneClass in clonesPerFile[fileName] ? fillColor("Red") : fillColor("White");
+	return cloneClass in clonesPerFile[fileName] ? fillColor("FireBrick") : fillColor("White");
+}
+
+private str className(FileName fileName) {
+	return head(split(".", head(reverse(split("/", fileName)))));
 }
