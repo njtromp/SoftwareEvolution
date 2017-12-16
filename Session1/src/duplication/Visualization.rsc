@@ -12,11 +12,7 @@ import duplication::CloneClasses;
 alias FileName = str;
 alias FileContent = list[str];
 
-private list[CloneClass] allCloneClasses; // Unmodified
-private list[CloneClass] cloneClasses; // Holds active selection
-
-public Figure createVisualization(list[CloneClass] newCloneClasses, map[FileName, FileContent] files) {
-	allCloneClasses = newCloneClasses;
+public Figure createVisualization(list[CloneClass] allCloneClasses, map[FileName, FileContent] files) {
 
 	cloneClasses = allCloneClasses;	
 	clonedFiles = uniqueFiles(cloneClasses);
@@ -30,9 +26,17 @@ public Figure createVisualization(list[CloneClass] newCloneClasses, map[FileName
 		return hcat([text("Clone classes"), combo(["All", "Single file", "Multiple files"], selectCloneClasses)], std(hresizable(false)));
 	}
 	
+	void selectCloneClasses(str selection) {
+		switch (selection) {
+			case "All" : cloneClasses = allCloneClasses;
+			case "Single file" : cloneClasses = [ cloneClass | cloneClass <- allCloneClasses, size({fileName | SourceInfo(fileName, _, _) <- cloneClass.sources}) == 1];
+			case "Multiple files" : cloneClasses = [ cloneClass | cloneClass <- allCloneClasses, size({fileName | SourceInfo(fileName, _, _) <- cloneClass.sources}) > 1];
+		}
+	}
+	
 	Figure createFigure() {
-		cloneGrid = createGrid(sort(clonedFiles), clonesPerFile);
-		menuBar = hcat([classSelection()], vresizable(false));
+		cloneGrid = createGrid(cloneClasses, sort(clonedFiles), clonesPerFile);
+		menuBar = hcat([classSelection()], vresizable(false), left());
 		return vcat(menuBar + [scrollable(cloneGrid)]);
 	}
 
@@ -44,15 +48,7 @@ private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
 	return toList({ fileName | cloneClass <- cloneClasses, SourceInfo(fileName, _, _) <- cloneClass.sources});
 }
 
-private void selectCloneClasses(str selection) {
-	switch (selection) {
-		case "All" : cloneClasses = allCloneClasses;
-		case "Single file" : cloneClasses = [ cloneClass | cloneClass <- allCloneClasses, size({fileName | SourceInfo(fileName, _, _) <- cloneClass.sources}) == 1];
-		case "Multiple files" : cloneClasses = [ cloneClass | cloneClass <- allCloneClasses, size({fileName | SourceInfo(fileName, _, _) <- cloneClass.sources}) > 1];
-	}
-}
-
-private Figure createGrid(list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
+private Figure createGrid(list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
 	list[Figure] clones = text("Classes\\Clones") + [ box(fillColor("PowderBlue")) | _ <- cloneClasses];
 	list[list[Figure]] clonesInFile = [ text(className(fileName)) + [ box( getColor(cloneClass, clonesPerFile, fileName) ) | cloneClass <- cloneClasses ] | fileName <- fileNames];
 
