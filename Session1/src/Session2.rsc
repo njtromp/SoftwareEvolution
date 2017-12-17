@@ -44,7 +44,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 		list[CloneClass] cloneClasses = detectCloneClasses(type1Tree, duplicationThreshold);
 		printCloneSummary(project, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
 		if (createVisuals) {
-			render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files));
+			render("Type-1 clones (<project.authority>)", createVisualization(project, cloneClasses, files));
 		}
 	}
 	
@@ -57,7 +57,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 		cloneClasses = removeFragments(cloneClasses);
 		printCloneSummary(project, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass2File);
 		if (createVisuals) {
-			render("Type-2 clones (<project.authority>)", createVisualization(cloneClasses, files));
+			render("Type-2 clones (<project.authority>)", createVisualization(project, cloneClasses, files));
 		}
 	}
 	
@@ -92,61 +92,4 @@ private list[CloneClass] removeFragments(list[CloneClass] cloneClasses) {
 
 private void printCloneClass(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
 	for (line <- toStrings(project, cloneClasses, files)) println(line);
-}
-
-private list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
-	list[str] asString = ["--- Clone class ---"];
-	for (cloneClass <- cloneClasses) {
-		if (size(cloneClass.fragment) == 0) {
-			// Type 2 clone handling
-			for (source <- cloneClass.sources) {
-				location = createCloneLocation(project, source);
-				location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. source.begin-1]]);
-				location.length = sum([size(line) + 1 | line <- files[source.fileName][source.begin-1 .. source.end]]);
-				asString += "<location>";
-				asString += files[source.fileName][source.begin-1 .. source.end];
-			}
-		} else {
-			// Type 1 clone handling
-			for (source <- cloneClass.sources) {
-				// By placing it here we have access to everything we need without passing everything as a parameter
-				loc adjustForEmptyLines(loc location) {
-					int line = location.begin.line - 1;
-					endLine = location.begin.line - 1;
-					lineCount = size(cloneClass.fragment);
-					while (lineCount > 0) {
-						if (!isEmpty(trim(files[source.fileName][line]))) {
-							lineCount -= 1;
-						}
-						endLine += 1;
-						line += 1;
-					}
-					location.end.line = endLine;
-					return location;
-				}
-				
-				location = createCloneLocation(project, source);
-				// The fragment only holds non-empty lines so we need to adjust the end line for this.
-				location = adjustForEmptyLines(location);
-				location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
-				location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
-				asString += "<location>";
-			}
-			asString += cloneClass.fragment;
-		}
-	}
-	return asString;
-}
-
-private loc createCloneLocation(loc project, SourceInfo source) {
-	loc location = |project://Dummy|(0,0,<0,1>,<0,1>);
-	location.authority = project.authority;
-	location.path = source.fileName;
-	location.end.line = source.end;
-	location.begin.line = source.begin;
-	return location;
-}
-
-private int length(list[str] lines) {
-	return sum([size(line) + 1 | line <- lines]);
 }
