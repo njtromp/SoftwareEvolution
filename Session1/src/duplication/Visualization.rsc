@@ -5,7 +5,9 @@ import Set;
 import Map;
 import List;
 import String;
+import vis::KeySym;
 import vis::Figure;
+import util::Editors;
 import duplication::Type1;
 import duplication::CloneClasses;
 
@@ -73,9 +75,14 @@ private FProperty getColor(CloneClass cloneClass, map[FileName, set[CloneClass]]
 	return cloneClass in clonesPerFile[fileName] ? fillColor("FireBrick") : fillColor("White");
 }
 
+private bool openSource(int i, map[KeyModifier, bool] m) {
+	edit(|project://Session1/src/Session2.rsc|); 
+	return true;
+}
+
 private FProperty popup(loc project, CloneClass cloneClass, map[FileName, set[CloneClass]] clonesPerFile, FileName fileName, map[FileName, FileContent] files) {
 	str popupText =  cloneClass in clonesPerFile[fileName] ? intercalate("\n", toStrings(project, [cloneClass], files)) : fileName;
-	return mouseOver(box(text(popupText), resizable(false)));
+	return mouseOver(box(text(popupText, onMouseDown(openSource)), resizable(false)));
 }
 
 private str className(FileName fileName) {
