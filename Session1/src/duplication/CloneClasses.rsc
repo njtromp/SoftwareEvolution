@@ -12,9 +12,9 @@ import duplication::Type1;
 
 public alias Fragment = list[str];
 public data SourceInfo = SourceInfo(str fileName, int begin, int end)
+                       | SourceInfo(str fileName, int begin, int end, loc location)
                        | SourceInfo(str fileName, int begin, int end, set[int] lineNrs);
-public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment)
-                       | CloneClass(list[SourceInfo] sources, list[loc] locations, Fragment fragment);
+public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\>");
@@ -142,11 +142,11 @@ public str toString(list[CloneClass] cloneClasses) {
 	return intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]);
 }
 
-public list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
+public list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files, map[str, list[str]] rawFiles) {
 	list[str] asString = ["--- Clone class ---"];
 	for (cloneClass <- cloneClasses) {
 		for (source <- cloneClass.sources) {
-			loc location = toLocation(project, source, size(cloneClass.fragment), files);			
+			loc location = toLocation(project, source, size(cloneClass.fragment), files, rawFiles);			
 			asString += "<location>";
 		}
 		asString += cloneClass.fragment;
@@ -154,7 +154,11 @@ public list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, 
 	return asString;
 }
 
-private loc toLocation(loc project, SourceInfo source, int fragmentSize, map[str, list[str]] files) {
+public list[CloneClass] addLocations(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files, map[str, list[str]] rawFiles) {
+	return [ CloneClass([ SourceInfo(fileName, begin, end, toLocation(project, s, size(fragment), files, rawFiles)) | s:SourceInfo(fileName, begin, end) <- sources ], fragment) | CloneClass(sources, fragment) <- cloneClasses];
+}
+
+private loc toLocation(loc project, SourceInfo source, int fragmentSize, map[str, list[str]] files, map[str, list[str]] rawFiles) {
 	loc adjustForEmptyLines(loc location) {
 		int line = location.begin.line - 1;
 		endLine = location.begin.line - 1;
@@ -176,8 +180,8 @@ private loc toLocation(loc project, SourceInfo source, int fragmentSize, map[str
 	location.begin.line = source.begin;
 	// The fragment only holds non-empty lines so we need to adjust the end line for this.
 	location = adjustForEmptyLines(location);
-	location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
-	location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
+	location.offset = length(rawFiles[source.fileName][0 .. location.begin.line - 1]);
+	location.length = length(rawFiles[source.fileName][location.begin.line - 1 .. location.end.line]);
 	return location;
 }
 

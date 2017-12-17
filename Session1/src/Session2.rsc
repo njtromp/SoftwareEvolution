@@ -40,28 +40,29 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 	println("\nAnalyzed <getAnalyzedType1BlocksCount()> blocks.");
 	print("Detecting clone-classes");
 	list[CloneClass] cloneClasses = detectCloneClasses(type1Tree, duplicationThreshold);
-	printCloneSummary(project, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
+	cloneClasses = addLocations(project, cloneClasses, files, rawFiles);
+	printCloneSummary(project, files, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
 	if (createVisuals) {
-		render("Type-1 clones (<project.authority>)", createVisualization(project, cloneClasses, files));
+		render("Type-1 clones (<project.authority>)", createVisualization(project, cloneClasses, files, rawFiles));
 	}
 	
 	println("Done");
 }
 
-private void printCloneSummary(loc project, map[str, list[str]] files, list[CloneClass] cloneClasses, int duplicationThreshold, int sloc, loc cloneClassFile) {
+private void printCloneSummary(loc project, map[str, list[str]] files, map[str, list[str]] rawFiles, list[CloneClass] cloneClasses, int duplicationThreshold, int sloc, loc cloneClassFile) {
 	if (size(cloneClasses) > 0) {
 		int clonedLines = sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses]);
 		println("\nFound <size(cloneClasses)> clone classes.");
 		println("Containing <clonedLines> lines (<round(1000.0*clonedLines/sloc)/10.0>%).");
 		println("-----------------------------------------------------------------");
 		println("Biggest (occur) clone class:");
-		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.sources) > size(cl2.sources);}))], files);
+		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.sources) > size(cl2.sources);}))], files, rawFiles);
 		println("-----------------------------------------------------------------");
 		println("Biggest (files) clone class:");
-		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size({s.fileName | s <- cl1.sources}) > size({s.fileName | s <- cl2.sources});}))], files);
+		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size({s.fileName | s <- cl1.sources}) > size({s.fileName | s <- cl2.sources});}))], files, rawFiles);
 		println("-----------------------------------------------------------------");
 		println("Biggest (lines) clone class:");
-		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.fragment) > size(cl2.fragment);}))], files);
+		printCloneClass(project, [head(sort(cloneClasses, bool(CloneClass cl1, CloneClass cl2){ return size(cl1.fragment) > size(cl2.fragment);}))], files, rawFiles);
 		println("-----------------------------------------------------------------");
 	
 		writeFile(cloneClassFile, duplication::CloneClasses::toString(cloneClasses));
@@ -74,6 +75,6 @@ private list[CloneClass] removeFragments(list[CloneClass] cloneClasses) {
 	return [ CloneClass(sources, []) | CloneClass(sources, _) <- cloneClasses];
 }
 
-private void printCloneClass(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
-	for (line <- toStrings(project, cloneClasses, files)) println(line);
+private void printCloneClass(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files, map[str, list[str]] rawFiles) {
+	for (line <- toStrings(project, cloneClasses, files, rawFiles)) println(line);
 }
