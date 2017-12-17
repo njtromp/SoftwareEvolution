@@ -61,7 +61,7 @@ public Figure createVisualization(loc project, list[CloneClass] allCloneClasses,
 }
 
 private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
-	return toList({ fileName | cloneClass <- cloneClasses, SourceInfo(fileName, _, _, _) <- cloneClass.sources});
+	return toList({ fileName | cloneClass <- cloneClasses, SourceInfo(fileName, _, _, loc _) <- cloneClass.sources});
 }
 
 private Figure createGrid(loc project, list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile, map[FileName, FileContent] files, map[FileName, FileContent] rawFiles) {
@@ -90,11 +90,11 @@ private str className(FileName fileName) {
 }
 
 private bool isSingleFileClone(CloneClass cloneClass) {
-	return size({fileName | SourceInfo(fileName, _, _, _) <- cloneClass.sources}) == 1;
+	return size({fileName | SourceInfo(fileName, _, _,loc _) <- cloneClass.sources}) == 1;
 }
 
 private bool isMultiFileClone(CloneClass cloneClass) {
-	return size({fileName | SourceInfo(fileName, _, _, _) <- cloneClass.sources}) > 1;
+	return size({fileName | SourceInfo(fileName, _, _, loc _) <- cloneClass.sources}) > 1;
 }
 
 private bool isSingleCloneFile(FileName fileName, map[FileName, set[CloneClass]] clonesPerFile) {
