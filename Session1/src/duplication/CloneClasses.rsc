@@ -13,7 +13,8 @@ import duplication::Type1;
 public alias Fragment = list[str];
 public data SourceInfo = SourceInfo(str fileName, int begin, int end)
                        | SourceInfo(str fileName, int begin, int end, set[int] lineNrs);
-public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment);
+public data CloneClass = CloneClass(list[SourceInfo] sources, Fragment fragment)
+                       | CloneClass(list[SourceInfo] sources, list[loc] locations, Fragment fragment);
 
 public list[CloneClass] detectCloneClasses(SuffixTree tree, int threshold) {
 	print("\>");
@@ -144,45 +145,36 @@ public str toString(list[CloneClass] cloneClasses) {
 public list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files) {
 	list[str] asString = ["--- Clone class ---"];
 	for (cloneClass <- cloneClasses) {
-		if (size(cloneClass.fragment) == 0) {
-			// Type 2 clone handling
-			for (source <- cloneClass.sources) {
-				location = createCloneLocation(project, source);
-				location.offset = sum([size(line) + 1 | line <- files[source.fileName][0 .. source.begin-1]]);
-				location.length = sum([size(line) + 1 | line <- files[source.fileName][source.begin-1 .. source.end]]);
-				asString += "<location>";
-				asString += files[source.fileName][source.begin-1 .. source.end];
-			}
-		} else {
-			// Type 1 clone handling
-			for (source <- cloneClass.sources) {
-				// By placing it here we have access to everything we need without passing everything as a parameter
-				loc adjustForEmptyLines(loc location) {
-					int line = location.begin.line - 1;
-					endLine = location.begin.line - 1;
-					lineCount = size(cloneClass.fragment);
-					while (lineCount > 0) {
-						if (!isEmpty(trim(files[source.fileName][line]))) {
-							lineCount -= 1;
-						}
-						endLine += 1;
-						line += 1;
-					}
-					location.end.line = endLine;
-					return location;
-				}
-				
-				location = createCloneLocation(project, source);
-				// The fragment only holds non-empty lines so we need to adjust the end line for this.
-				location = adjustForEmptyLines(location);
-				location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
-				location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
-				asString += "<location>";
-			}
-			asString += cloneClass.fragment;
+		for (source <- cloneClass.sources) {
+			loc location = toLocation(project, source, size(cloneClass.fragment), files);			
+			asString += "<location>";
 		}
+		asString += cloneClass.fragment;
 	}
 	return asString;
+}
+
+private loc toLocation(loc project, SourceInfo source, int fragmentSize, map[str, list[str]] files) {
+	loc adjustForEmptyLines(loc location) {
+		int line = location.begin.line - 1;
+		endLine = location.begin.line - 1;
+		while (fragmentSize > 0) {
+			if (!isEmpty(trim(files[source.fileName][line]))) {
+				fragmentSize -= 1;
+			}
+			endLine += 1;
+			line += 1;
+		}
+		location.end.line = endLine;
+		return location;
+	}
+	
+	location = createCloneLocation(project, source);
+	// The fragment only holds non-empty lines so we need to adjust the end line for this.
+	location = adjustForEmptyLines(location);
+	location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
+	location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
+	return location;
 }
 
 private loc createCloneLocation(loc project, SourceInfo source) {
