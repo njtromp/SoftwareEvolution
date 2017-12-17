@@ -169,20 +169,15 @@ private loc toLocation(loc project, SourceInfo source, int fragmentSize, map[str
 		return location;
 	}
 	
-	location = createCloneLocation(project, source);
-	// The fragment only holds non-empty lines so we need to adjust the end line for this.
-	location = adjustForEmptyLines(location);
-	location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
-	location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
-	return location;
-}
-
-private loc createCloneLocation(loc project, SourceInfo source) {
 	loc location = |project://Dummy|(0,0,<0,1>,<0,1>);
 	location.authority = project.authority;
 	location.path = source.fileName;
 	location.end.line = source.end;
 	location.begin.line = source.begin;
+	// The fragment only holds non-empty lines so we need to adjust the end line for this.
+	location = adjustForEmptyLines(location);
+	location.offset = length(files[source.fileName][0 .. location.begin.line - 1]);
+	location.length = length(files[source.fileName][location.begin.line - 1 .. location.end.line]);
 	return location;
 }
 
