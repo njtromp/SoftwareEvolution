@@ -109,7 +109,7 @@ private SourceInfo convertSourceInfo(s:SourceInfo(_ ,_ ,_)) {
 	return s;
 }
 
-private SourceInfo convertSourceInfo(SourceInfo(fileName, _, _, lineNrs)) {
+private SourceInfo convertSourceInfo(SourceInfo(fileName, _, _, set[int] lineNrs)) {
 	sortedLineNrs = sort(toList(lineNrs));
 	return SourceInfo(fileName, head(sortedLineNrs), head(reverse(sortedLineNrs)));
 }
@@ -130,7 +130,7 @@ private list[SourceInfo] cast(list[value] lst) {
 			case SourceInfo(source, begin, end) : {
 				sources += [SourceInfo(source, begin, end)];
 			}
-			case SourceInfo(source, begin, end, lineNrs) : {
+			case SourceInfo(source, begin, end, set[int] lineNrs) : {
 				sources += [SourceInfo(source, begin, end, lineNrs)];
 			}
 		}

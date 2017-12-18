@@ -14,7 +14,7 @@ import duplication::CloneClasses;
 alias FileName = str;
 alias FileContent = list[str];
 
-public Figure createVisualization(loc project, list[CloneClass] allCloneClasses, map[FileName, FileContent] files, map[FileName, FileContent] rawFiles) {
+public Figure createVisualization(list[CloneClass] allCloneClasses, map[FileName, FileContent] files, map[FileName, FileContent] rawFiles) {
 
 	allClonedFiles = uniqueFiles(allCloneClasses);
 	clonedFiles = allClonedFiles;
@@ -51,38 +51,36 @@ public Figure createVisualization(loc project, list[CloneClass] allCloneClasses,
 	}
 	
 	Figure createFigure() {
-		cloneGrid = createGrid(project, cloneClasses, sort(clonedFiles), clonesPerFile, files, rawFiles);
-		menuBar = hcat([fileSelection(), classSelection()], std(vresizable(false)), std(hresizable(false)), std(left()));
-		return vcat(menuBar + [scrollable(cloneGrid)]);
+		return createGrid(cloneClasses, sort(clonedFiles), clonesPerFile);
 	}
-
+	Figure menuBar = hcat([fileSelection(), classSelection()], std(vresizable(false)), std(hresizable(false)), std(left()));
 	list[FProperty] noProps = [];
-	return computeFigure(createFigure, noProps);
+	return vcat(menuBar + [scrollable(computeFigure(createFigure, noProps))]);
 }
 
 private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
 	return toList({ fileName | cloneClass <- cloneClasses, SourceInfo(fileName, _, _, loc _) <- cloneClass.sources});
 }
 
-private Figure createGrid(loc project, list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile, map[FileName, FileContent] files, map[FileName, FileContent] rawFiles) {
+private Figure createGrid(list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
 	list[Figure] clones = text("Classes\\Clones") + [ box(fillColor("PowderBlue")) | _ <- cloneClasses];
-	list[list[Figure]] clonesInFile = [ text(className(fileName)) + [ box(getColor(cloneClass, clonesPerFile, fileName), popup(project, cloneClass, clonesPerFile, fileName, files, rawFiles)) | cloneClass <- cloneClasses ] | fileName <- fileNames];
-
+	list[list[Figure]] clonesInFile = [ text(className(fileName)) + [ cloneBox(cloneClass, fileName, clonesPerFile) | cloneClass <- cloneClasses ] | fileName <- fileNames];
 	return grid([clones] + clonesInFile);
 }
 
-private FProperty getColor(CloneClass cloneClass, map[FileName, set[CloneClass]] clonesPerFile, FileName fileName) {
-	return cloneClass in clonesPerFile[fileName] ? fillColor("FireBrick") : fillColor("White");
+private Figure cloneBox(CloneClass cloneClass, FileName fileName, map[FileName, set[CloneClass]] clonesPerFile) {
+	if (cloneClass in clonesPerFile[fileName]) {
+		return box(fillColor("FireBrick"), popup(cloneClass));
+	} else {
+		return box(fillColor("White"));
+	}
 }
 
-private bool openSource(int i, map[KeyModifier, bool] m) {
-	edit(|project://Session1/src/Session2.rsc|); 
-	return true;
-}
-
-private FProperty popup(loc project, CloneClass cloneClass, map[FileName, set[CloneClass]] clonesPerFile, FileName fileName, map[FileName, FileContent] files, map[str, list[str]] rawFiles) {
-	str popupText =  cloneClass in clonesPerFile[fileName] ? intercalate("\n", toStrings(project, [cloneClass], files, rawFiles)) : fileName;
-	return mouseOver(box(text(popupText, onMouseDown(openSource)), resizable(false)));
+private FProperty popup(CloneClass cloneClass) {
+	// onMouseDown and mouseOver don't cooperate! Results in a stackoverflow...
+	//list[Figure] locations = [text("<source.fileName>", onMouseDown(bool(int btn, map[KeyModifier, bool] mods){edit(source.location); return true;})) | source <- cloneClass.sources];
+	list[Figure] locations = [text("<source.fileName>") | source <- cloneClass.sources];
+	return mouseOver(box(vcat(locations + [text(intercalate("\n", cloneClass.fragment))]), resizable(false)));
 }
 
 private str className(FileName fileName) {

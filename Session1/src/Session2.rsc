@@ -43,7 +43,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 	cloneClasses = addLocations(project, cloneClasses, files, rawFiles);
 	printCloneSummary(project, files, rawFiles, cloneClasses, duplicationThreshold, sloc, cloneClass1File);
 	if (createVisuals) {
-		render("Type-1 clones (<project.authority>)", createVisualization(project, cloneClasses, files, rawFiles));
+		render("Type-1 clones (<project.authority>)", createVisualization(cloneClasses, files, rawFiles));
 	}
 	
 	println("Done");
