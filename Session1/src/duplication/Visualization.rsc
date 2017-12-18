@@ -63,24 +63,25 @@ private list[FileName] uniqueFiles(list[CloneClass] cloneClasses) {
 }
 
 private Figure createGrid(list[CloneClass] cloneClasses, list[FileName] fileNames, map[FileName, set[CloneClass]] clonesPerFile) {
-	list[Figure] clones = text("Classes\\Clones") + [ box(fillColor("PowderBlue")) | _ <- cloneClasses];
-	list[list[Figure]] clonesInFile = [ text(className(fileName)) + [ cloneBox(cloneClass, fileName, clonesPerFile) | cloneClass <- cloneClasses ] | fileName <- fileNames];
+	list[Figure] clones = box(text("Classes\\Clones"), fillColor("LightBlue")) + [ box(fillColor("PowderBlue")) | _ <- cloneClasses];
+	list[list[Figure]] clonesInFile = [ box(text(className(fileName)), fillColor("PowderBlue")) + [ cloneBox(cloneClass, fileName, clonesPerFile) | cloneClass <- cloneClasses ] | fileName <- fileNames];
 	return grid([clones] + clonesInFile);
 }
 
 private Figure cloneBox(CloneClass cloneClass, FileName fileName, map[FileName, set[CloneClass]] clonesPerFile) {
 	if (cloneClass in clonesPerFile[fileName]) {
-		return box(fillColor("FireBrick"), popup(cloneClass));
+		return box(vcat([cloneLocation(location) | SourceInfo(_, _, _, loc location) <- cloneClass.sources] + cloneFragment(cloneClass.fragment), std(vresizable(false)), top()), fillColor("FireBrick"));
 	} else {
-		return box(fillColor("White"));
+		return box(fillColor("LightSteelBlue"));
 	}
 }
 
-private FProperty popup(CloneClass cloneClass) {
-	// onMouseDown and mouseOver don't cooperate! Results in a stackoverflow...
-	//list[Figure] locations = [text("<source.fileName>", onMouseDown(bool(int btn, map[KeyModifier, bool] mods){edit(source.location); return true;})) | source <- cloneClass.sources];
-	list[Figure] locations = [text("<source.fileName>") | source <- cloneClass.sources];
-	return mouseOver(box(vcat(locations + [text(intercalate("\n", cloneClass.fragment))]), resizable(false)));
+private Figure cloneLocation(loc location) {
+	return text("<className(location.path)>", onMouseDown(bool (int btn, map[KeyModifier, bool] mods) { edit(location); return true;}));
+}
+
+private Figure cloneFragment(Fragment fragment) {
+	return scrollable(box(text(intercalate("\n", fragment)), fillColor("DarkRed"), onMouseDown(bool(int btn, map[KeyModifier,bool] mods){println(intercalate("\n", fragment)); return true;})), []);
 }
 
 private str className(FileName fileName) {
@@ -88,7 +89,7 @@ private str className(FileName fileName) {
 }
 
 private bool isSingleFileClone(CloneClass cloneClass) {
-	return size({fileName | SourceInfo(fileName, _, _,loc _) <- cloneClass.sources}) == 1;
+	return size({fileName | SourceInfo(fileName, _, _, loc _) <- cloneClass.sources}) == 1;
 }
 
 private bool isMultiFileClone(CloneClass cloneClass) {
