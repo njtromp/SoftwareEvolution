@@ -139,15 +139,14 @@ private list[SourceInfo] cast(list[value] lst) {
 }
 
 public str toString(list[CloneClass] cloneClasses) {
-	return intercalate("\n\n", [ "<intercalate("\n", cloneClass.sources)>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]);
+	return intercalate("\n\n", [ "<intercalate("\n", [ "<source.location>" | source <- cloneClass.sources])>\n\t<intercalate("\n\t", cloneClass.fragment)>" | cloneClass <- cloneClasses ]);
 }
 
 public list[str] toStrings(loc project, list[CloneClass] cloneClasses, map[str, list[str]] files, map[str, list[str]] rawFiles) {
 	list[str] asString = ["--- Clone class ---"];
 	for (cloneClass <- cloneClasses) {
 		for (source <- cloneClass.sources) {
-			loc location = toLocation(project, source, size(cloneClass.fragment), files, rawFiles);			
-			asString += "<location>";
+			asString += "<source.location>";
 		}
 		asString += cloneClass.fragment;
 	}

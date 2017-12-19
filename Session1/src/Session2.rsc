@@ -52,7 +52,7 @@ public void main(loc project, int duplicationThreshold = 6, loc cloneClass1File 
 private void printCloneSummary(loc project, map[str, list[str]] files, map[str, list[str]] rawFiles, list[CloneClass] cloneClasses, int duplicationThreshold, int sloc, loc cloneClassFile) {
 	if (size(cloneClasses) > 0) {
 		int clonedLines = sum([0] + [size(cc.sources) * size(cc.fragment) | cc <- cloneClasses]);
-		println("\nFound <size(cloneClasses)> clone classes.");
+		println("\nFound <size(cloneClasses)> clone classes with <sum([0] + [size(cloneClass.sources) | cloneClass <- cloneClasses])> clones.");
 		println("Containing <clonedLines> lines (<round(1000.0*clonedLines/sloc)/10.0>%).");
 		println("-----------------------------------------------------------------");
 		println("Biggest (occur) clone class:");
